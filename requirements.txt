@@ -1,0 +1,29 @@
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+pyodbc==5.0.1
+python-multipart==0.0.6
+azure-storage-blob==12.19.0
+azure-identity==1.15.0
+pydantic==2.5.3
+msal==1.26.0
+cryptography==41.0.7
+python-dotenv==1.0.0
+```
+- **Commit**
+
+**Plik 2: `Procfile`** (bez extension!)
+```
+web: uvicorn main:app --host 0.0.0.0 --port $PORT
+```
+
+**Plik 3: `runtime.txt`**
+```
+python-3.11
+```
+
+**Plik 4: `.gitignore`**
+```
+__pycache__/
+*.pyc
+.env
+venv/

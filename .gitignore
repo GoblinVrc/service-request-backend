@@ -1,0 +1,56 @@
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+pyodbc==5.0.1
+python-multipart==0.0.6
+azure-storage-blob==12.19.0
+azure-identity==1.15.0
+pydantic==2.5.3
+msal==1.26.0
+cryptography==41.0.7
+python-dotenv==1.0.0
+```
+
+---
+
+## PLIK 2/12: `Procfile`
+
+⚠️ **WAŻNE: Bez extension! Tylko "Procfile"**
+```
+web: uvicorn main:app --host 0.0.0.0 --port $PORT
+```
+
+---
+
+## PLIK 3/12: `runtime.txt`
+```
+python-3.11
+```
+
+---
+
+## PLIK 4/12: `.gitignore`
+```
+# Environment
+.env
+.env.local
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+build/
+dist/
+*.egg-info/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
