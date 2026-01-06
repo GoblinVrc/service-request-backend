@@ -56,12 +56,15 @@ def health_check():
     
     return health_status
 
-from routers import requests, lookups, upload, auth
+from routers import requests, lookups, upload, auth, countries, validation, intake
 
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
 app.include_router(requests.router, prefix="/api/requests", tags=["Requests"])
 app.include_router(lookups.router, prefix="/api/lookups", tags=["Lookups"])
 app.include_router(upload.router, prefix="/api", tags=["Upload"])
+app.include_router(countries.router, prefix="/api", tags=["Countries & Languages"])
+app.include_router(validation.router, prefix="/api", tags=["Validation"])
+app.include_router(intake.router, prefix="/api", tags=["Intake Form"])
 
 if __name__ == "__main__":
     import uvicorn
