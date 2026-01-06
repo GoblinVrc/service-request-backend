@@ -9,12 +9,36 @@ load_dotenv()
 def get_connection_string() -> str:
     server = os.getenv('AZURE_SQL_SERVER')
     database = os.getenv('AZURE_SQL_DATABASE')
+
+    if not all([server, database]):
+        raise ValueError("Missing AZURE_SQL_SERVER or AZURE_SQL_DATABASE in environment variables")
+
+    # Check if using Service Principal (SPN) authentication
+    client_id = os.getenv('AZURE_CLIENT_ID')
+    client_secret = os.getenv('AZURE_CLIENT_SECRET')
+    tenant_id = os.getenv('AZURE_TENANT_ID')
+
+    # If SPN credentials provided, use Azure AD authentication
+    if all([client_id, client_secret, tenant_id]):
+        return (
+            f"Driver={{ODBC Driver 18 for SQL Server}};"
+            f"Server=tcp:{server},1433;"
+            f"Database={database};"
+            f"Authentication=ActiveDirectoryServicePrincipal;"
+            f"Uid={client_id};"
+            f"Pwd={client_secret};"
+            f"Encrypt=yes;"
+            f"TrustServerCertificate=no;"
+            f"Connection Timeout=30;"
+        )
+
+    # Otherwise use SQL authentication
     username = os.getenv('AZURE_SQL_USER')
     password = os.getenv('AZURE_SQL_PASSWORD')
-    
-    if not all([server, database, username, password]):
-        raise ValueError("Missing Azure SQL credentials in environment variables")
-    
+
+    if not all([username, password]):
+        raise ValueError("Missing credentials: Either provide (AZURE_CLIENT_ID, AZURE_CLIENT_SECRET, AZURE_TENANT_ID) for SPN auth OR (AZURE_SQL_USER, AZURE_SQL_PASSWORD) for SQL auth")
+
     return (
         f"Driver={{ODBC Driver 18 for SQL Server}};"
         f"Server=tcp:{server},1433;"
