@@ -127,36 +127,5 @@ def download_file(
     )
     
     download_url = f"https://{os.getenv('AZURE_STORAGE_ACCOUNT_NAME')}.blob.core.windows.net/{CONTAINER_NAME}/{blob_name}?{sas_token}"
-    
+
     return {"download_url": download_url}
-```
-
----
-
-## ✅ TO WSZYSTKO!
-
-Teraz masz wszystkie 12 plików. Po skopiowaniu ich do GitHub:
-
-### 📋 Następne kroki:
-
-1. **Połącz Railway z GitHub repo**
-   - Railway → New Project → Deploy from GitHub
-   - Wybierz `service-request-backend`
-
-2. **Dodaj Environment Variables w Railway:**
-```
-   AZURE_SQL_SERVER=yourserver.database.windows.net
-   AZURE_SQL_DATABASE=YourDB
-   AZURE_SQL_USER=youruser
-   AZURE_SQL_PASSWORD=yourpass
-   
-   AZURE_BLOB_CONNECTION_STRING=DefaultEndpointsProtocol=https;...
-   AZURE_STORAGE_ACCOUNT_NAME=youraccount
-   AZURE_STORAGE_ACCOUNT_KEY=yourkey
-   
-   ENTRA_TENANT_ID=your-tenant-id
-   ENTRA_CLIENT_ID=your-client-id
-   ENTRA_CLIENT_SECRET=your-secret
-   
-   ALLOWED_ORIGINS=http://localhost:3000
-   ADMIN_EMAILS=admin@stryker.com
