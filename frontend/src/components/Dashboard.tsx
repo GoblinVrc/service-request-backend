@@ -32,16 +32,25 @@ const Dashboard: React.FC<DashboardProps> = ({ onTicketClick, filters }) => {
         const requests = await apiService.get<ServiceRequest[]>('/api/requests');
 
         // Convert ServiceRequest to Ticket format
-        const convertedTickets: Ticket[] = requests.map(req => ({
-          id: req.RequestCode,
-          subject: req.ItemDescription || req.MainReason || 'Service Request',
-          status: req.Status === 'Submitted' ? 'Open' : req.Status as any,
-          date: new Date(req.SubmittedDate).toISOString().split('T')[0],
-          assignee: req.Territory || 'Unassigned',
-          priority: req.UrgencyLevel,
-          category: req.MainReason,
-          location: req.SiteAddress || req.CountryCode,
-        }));
+        const convertedTickets: Ticket[] = requests.map(req => {
+          // Map urgency levels to priority
+          const priorityMap: Record<string, 'Low' | 'Normal' | 'High' | 'Critical'> = {
+            'Normal': 'Normal',
+            'Urgent': 'High',
+            'Critical': 'Critical',
+          };
+
+          return {
+            id: req.RequestCode,
+            subject: req.ItemDescription || req.MainReason || 'Service Request',
+            status: req.Status === 'Submitted' ? 'Open' : req.Status as any,
+            date: new Date(req.SubmittedDate).toISOString().split('T')[0],
+            assignee: req.Territory || 'Unassigned',
+            priority: priorityMap[req.UrgencyLevel] || 'Normal',
+            category: req.MainReason,
+            location: req.SiteAddress || req.CountryCode,
+          };
+        });
 
         setTickets(convertedTickets);
       } catch (error) {
