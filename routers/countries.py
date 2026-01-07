@@ -12,10 +12,10 @@ def get_countries(token_data: TokenData = Depends(verify_entra_token)):
     UR-029: Multi-country support
     """
     query = """
-        SELECT CountryCode, CountryName, DefaultLanguage, SupportedLanguages
-        FROM REGOPS_APP.tbl_globi_eu_am_99_Countries
-        WHERE IsActive = 1
-        ORDER BY CountryName
+        SELECT country_code, country_name, default_language, supported_languages
+        FROM regops_app.tbl_globi_eu_am_99_countries
+        WHERE is_active = true
+        ORDER BY country_name
     """
     return execute_query(query)
 
@@ -29,15 +29,14 @@ def get_country_languages(
     UR-030: Language support
     """
     query = """
-        SELECT LanguageCode, LanguageName
-        FROM REGOPS_APP.tbl_globi_eu_am_99_Languages
-        WHERE LanguageCode IN (
-            SELECT value
-            FROM REGOPS_APP.tbl_globi_eu_am_99_Countries
-            CROSS APPLY OPENJSON(SupportedLanguages)
-            WHERE CountryCode = ?
+        SELECT l.language_code, l.language_name
+        FROM regops_app.tbl_globi_eu_am_99_languages l
+        WHERE l.language_code = ANY(
+            SELECT jsonb_array_elements_text(c.supported_languages::jsonb)
+            FROM regops_app.tbl_globi_eu_am_99_countries c
+            WHERE c.country_code = %s
         )
-        AND IsActive = 1
+        AND l.is_active = true
     """
     return execute_query(query, (country_code,))
 
@@ -52,10 +51,10 @@ def get_legal_documents(
     UR-031: Terms and Conditions and Privacy Policy
     """
     query = """
-        SELECT DocumentType, DocumentURL, DocumentContent, Version, EffectiveDate
-        FROM REGOPS_APP.tbl_globi_eu_am_99_LegalDocuments
-        WHERE CountryCode = ?
-        AND LanguageCode = ?
-        AND IsActive = 1
+        SELECT document_type, document_url, document_content, version, effective_date
+        FROM regops_app.tbl_globi_eu_am_99_legal_documents
+        WHERE country_code = %s
+        AND language_code = %s
+        AND is_active = true
     """
     return execute_query(query, (country_code, language_code))
