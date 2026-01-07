@@ -1,12 +1,6 @@
 from fastapi import Depends, HTTPException, status
 from typing import Optional
 from pydantic import BaseModel
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
-
-DEMO_MODE = os.getenv("DEMO_MODE", "true").lower() == "true"
 
 class Roles:
     CUSTOMER = "Customer"
@@ -23,33 +17,24 @@ class TokenData(BaseModel):
 def verify_entra_token() -> TokenData:
     """
     Simplified authentication for PoC.
-    Always returns demo admin user.
+    In a real application, this would validate JWT tokens or session cookies.
+    For now, we return a generic user to allow API access.
+    Authentication is handled by the /login endpoint.
     """
-    if DEMO_MODE:
-        return TokenData(
-            email="demo@stryker.com",
-            role=Roles.ADMIN,
-            name="Demo User",
-            customer_number=None,
-            territories=None
-        )
-
-    # For production, implement real authentication here
-    raise HTTPException(
-        status_code=status.HTTP_501_NOT_IMPLEMENTED,
-        detail="Authentication not implemented. Enable DEMO_MODE for PoC."
+    return TokenData(
+        email="anonymous@stryker.com",
+        role=Roles.CUSTOMER,
+        name="Anonymous User",
+        customer_number=None,
+        territories=None
     )
 
 def require_role(allowed_roles: list):
     """
     Role-based access control decorator.
-    Currently disabled for PoC - all users are admins.
+    Currently disabled for PoC - all users have access.
     """
     def role_checker(token_data: TokenData = Depends(verify_entra_token)):
-        if not DEMO_MODE and token_data.role not in allowed_roles:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"Insufficient permissions. Required roles: {allowed_roles}"
-            )
+        # For PoC, allow all roles
         return token_data
     return role_checker

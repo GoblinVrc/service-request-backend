@@ -310,3 +310,27 @@
     font-size: 1.5rem;
   }
 }
+
+/* Login Error Message */
+.login-error {
+  padding: 0.75rem 1rem;
+  background: #ffebee;
+  border: 1px solid #ef5350;
+  border-radius: 8px;
+  color: #c62828;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+/* Login Hint */
+.login-hint {
+  text-align: center;
+  margin-top: -0.5rem;
+}
+
+.login-hint small {
+  color: var(--stryker-dark-gray);
+  font-size: 0.75rem;
+  line-height: 1.4;
+  display: block;
+}

@@ -3,6 +3,7 @@ export const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8
 
 export const API_ENDPOINTS = {
   // Auth
+  LOGIN: '/api/login',
   AUTH_ME: '/api/auth/me',
 
   // Countries & Languages

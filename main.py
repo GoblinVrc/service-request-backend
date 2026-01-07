@@ -57,8 +57,9 @@ def health_check():
     
     return health_status
 
-from routers import requests, lookups, upload, auth, countries, validation, intake
+from routers import requests, lookups, upload, auth, countries, validation, intake, login
 
+app.include_router(login.router, prefix="/api", tags=["Login"])
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
 app.include_router(requests.router, prefix="/api/requests", tags=["Requests"])
 app.include_router(lookups.router, prefix="/api/lookups", tags=["Lookups"])

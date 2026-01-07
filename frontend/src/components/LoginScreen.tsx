@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import apiService from '../services/apiService';
+import { API_ENDPOINTS } from '../config/apiConfig';
 import './LoginScreen.css';
 
 interface LoginScreenProps {
@@ -6,19 +8,31 @@ interface LoginScreenProps {
 }
 
 const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError('');
 
-    // Simulate authentication - in real app, call backend
-    setTimeout(() => {
+    try {
+      const response = await apiService.post(API_ENDPOINTS.LOGIN, {
+        email,
+        password
+      });
+
+      // Store user data in localStorage
+      localStorage.setItem('user', JSON.stringify(response));
+
       setIsLoading(false);
       onLogin();
-    }, 800);
+    } catch (err: any) {
+      setIsLoading(false);
+      setError(err.response?.data?.detail || 'Login failed. Please check your credentials.');
+    }
   };
 
   return (
@@ -52,14 +66,20 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
           </div>
 
           <form onSubmit={handleSubmit} className="login-form">
+            {error && (
+              <div className="login-error">
+                {error}
+              </div>
+            )}
+
             <div className="form-group">
-              <label htmlFor="username">Username</label>
+              <label htmlFor="email">Email</label>
               <input
-                type="text"
-                id="username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="Enter your username"
+                type="email"
+                id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email"
                 required
                 disabled={isLoading}
               />
@@ -92,6 +112,10 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
                 'Sign In'
               )}
             </button>
+
+            <div className="login-hint">
+              <small>Demo users: admin@stryker.com / admin, sales@stryker.com / sales, customer@company.com / customer</small>
+            </div>
 
             <div className="login-footer">
               <a href="#forgot" className="forgot-link">
