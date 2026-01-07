@@ -5,7 +5,7 @@ import { PublicClientApplication } from '@azure/msal-browser';
 import { msalConfig } from './config/authConfig';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
-import IntakeForm from './pages/IntakeForm';
+import NewRequestForm from './pages/NewRequestForm';
 import './App.css';
 
 // Initialize MSAL
@@ -27,7 +27,7 @@ function App() {
             <Routes>
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/intake" element={<IntakeForm />} />
+              <Route path="/request/new" element={<NewRequestForm />} />
               <Route path="/login" element={<Navigate to="/dashboard" replace />} />
               <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>

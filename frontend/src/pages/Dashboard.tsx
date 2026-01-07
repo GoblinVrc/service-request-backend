@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ServiceRequest, User } from '../types';
+import apiService from '../services/apiService';
 import './Dashboard.css';
 
 const Dashboard: React.FC = () => {
@@ -26,11 +27,12 @@ const Dashboard: React.FC = () => {
         setUser(userProfile);
       }
 
-      // Load service requests (mock data for demo)
-      // In production, call: apiService.get<ServiceRequest[]>(API_ENDPOINTS.REQUESTS)
-      setRequests([]);
+      // Load service requests from API
+      const requestsData = await apiService.get<ServiceRequest[]>('/api/requests');
+      setRequests(requestsData);
     } catch (error) {
       console.error('Failed to load data:', error);
+      setRequests([]); // Set empty array on error
     } finally {
       setLoading(false);
     }
@@ -43,7 +45,7 @@ const Dashboard: React.FC = () => {
   };
 
   const handleNewRequest = () => {
-    navigate('/intake');
+    navigate('/request/new');
   };
 
   const handleViewRequest = (requestId: number) => {
