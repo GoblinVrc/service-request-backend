@@ -210,7 +210,7 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
         country_code: 'US',
         language_code: 'en',
         customer_number: user?.customer_number || 'GUEST',
-        customer_name: user?.name || 'Guest Customer',
+        customer_name: user?.customer_name || 'Guest Customer',
         contact_name: formData.contact_name,
         contact_email: formData.contact_email,
         contact_phone: formData.contact_phone,
