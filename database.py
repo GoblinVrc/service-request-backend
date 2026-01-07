@@ -54,10 +54,18 @@ def get_connection_string() -> str:
 def get_db_connection():
     conn = None
     try:
+        conn_str = get_connection_string()
+        # Log connection attempt (hide secrets)
+        import re
+        safe_conn_str = re.sub(r'(Pwd|Password)=[^;]+', r'\1=***', conn_str)
+        print(f"Attempting connection with: {safe_conn_str}")
+
         conn = pyodbc.connect(get_connection_string())
+        print("Database connection successful!")
         yield conn
         conn.commit()
     except Exception as e:
+        print(f"Database connection failed: {str(e)}")
         if conn:
             conn.rollback()
         raise e
