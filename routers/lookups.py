@@ -10,9 +10,9 @@ def lookup_serial(
     token_data: TokenData = Depends(verify_entra_token)
 ):
     query = """
-        SELECT TOP 10 
+        SELECT TOP 10
             SerialNumber, ItemNumber, ItemDescription, LotNumber
-        FROM Items
+        FROM REGOPS_APP.tbl_globi_eu_am_99_Items
         WHERE SerialNumber LIKE ?
         ORDER BY SerialNumber
     """
@@ -26,9 +26,9 @@ def lookup_lot(
     token_data: TokenData = Depends(verify_entra_token)
 ):
     query = """
-        SELECT TOP 10 
+        SELECT TOP 10
             LotNumber, ItemNumber, ItemDescription, COUNT(*) as ItemCount
-        FROM Items
+        FROM REGOPS_APP.tbl_globi_eu_am_99_Items
         WHERE LotNumber LIKE ?
         GROUP BY LotNumber, ItemNumber, ItemDescription
         ORDER BY LotNumber
@@ -43,9 +43,9 @@ def lookup_item(
     token_data: TokenData = Depends(verify_entra_token)
 ):
     query = """
-        SELECT TOP 10 
+        SELECT TOP 10
             ItemNumber, ItemDescription, COUNT(*) as InstanceCount
-        FROM Items
+        FROM REGOPS_APP.tbl_globi_eu_am_99_Items
         WHERE ItemNumber LIKE ? OR ItemDescription LIKE ?
         GROUP BY ItemNumber, ItemDescription
         ORDER BY ItemNumber
@@ -57,8 +57,8 @@ def lookup_item(
 @router.get("/reasons")
 def get_reasons(token_data: TokenData = Depends(verify_entra_token)):
     query = """
-        SELECT MainReason, SubReason 
-        FROM IssueReasons
+        SELECT MainReason, SubReason
+        FROM REGOPS_APP.tbl_globi_eu_am_99_IssueReasons
         ORDER BY MainReason, SubReason
     """
     

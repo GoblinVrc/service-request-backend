@@ -92,7 +92,7 @@ def submit_service_request(
 
         # Call stored procedure to generate request code
         request_code_param = cursor.execute(
-            "DECLARE @code NVARCHAR(50); EXEC sp_GenerateRequestCode ?, @code OUTPUT; SELECT @code",
+            "DECLARE @code NVARCHAR(50); EXEC REGOPS_APP.sp_GenerateRequestCode ?, @code OUTPUT; SELECT @code",
             (request.country_code,)
         ).fetchone()[0]
 
@@ -102,7 +102,7 @@ def submit_service_request(
             # Auto-assign based on item data
             item_query = """
                 SELECT RepairabilityStatus
-                FROM Items
+                FROM REGOPS_APP.tbl_globi_eu_am_99_Items
                 WHERE (SerialNumber = ? OR ItemNumber = ?)
                 AND IsServiceable = 1
             """
@@ -118,7 +118,7 @@ def submit_service_request(
         if request.customer_number:
             territory_query = """
                 SELECT TOP 1 Territory
-                FROM CustomerTerritories
+                FROM REGOPS_APP.tbl_globi_eu_am_99_CustomerTerritories
                 WHERE CustomerNumber = ?
             """
             territory_result = execute_query(territory_query, (request.customer_number,))
@@ -127,7 +127,7 @@ def submit_service_request(
 
         # Insert service request
         insert_query = """
-            INSERT INTO ServiceRequests (
+            INSERT INTO REGOPS_APP.tbl_globi_eu_am_99_ServiceRequests (
                 RequestCode,
                 RequestType,
                 CustomerNumber,
@@ -200,7 +200,7 @@ def submit_service_request(
 
         # Log activity
         cursor.execute("""
-            INSERT INTO ActivityLog (RequestId, ActivityType, ActivityDescription, PerformedBy)
+            INSERT INTO REGOPS_APP.tbl_globi_eu_am_99_ActivityLog (RequestId, ActivityType, ActivityDescription, PerformedBy)
             VALUES (?, 'Created', 'Service request created', ?)
         """, (request_id, token_data.email))
 
@@ -226,7 +226,7 @@ def get_issue_reasons(
     """
     query = """
         SELECT MainReason, SubReason, DisplayOrder
-        FROM IssueReasons
+        FROM REGOPS_APP.tbl_globi_eu_am_99_IssueReasons
         WHERE LanguageCode = ?
         AND IsActive = 1
         ORDER BY DisplayOrder, MainReason, SubReason
@@ -253,7 +253,7 @@ def get_repairability_statuses(token_data: TokenData = Depends(verify_entra_toke
     """
     query = """
         SELECT StatusCode, StatusName, Description, RepairLocation
-        FROM RepairabilityStatuses
+        FROM REGOPS_APP.tbl_globi_eu_am_99_RepairabilityStatuses
         WHERE IsActive = 1
         ORDER BY StatusName
     """

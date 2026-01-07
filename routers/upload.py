@@ -22,7 +22,7 @@ async def upload_files(
     token_data: TokenData = Depends(verify_entra_token)
 ):
     # Verify request access
-    request_query = "SELECT CustomerNumber, Territory FROM ServiceRequests WHERE Id = ?"
+    request_query = "SELECT CustomerNumber, Territory FROM REGOPS_APP.tbl_globi_eu_am_99_ServiceRequests WHERE Id = ?"
     request_result = execute_query(request_query, (request_id,))
     
     if not request_result:
@@ -74,7 +74,7 @@ async def upload_files(
             
             # Save to DB
             insert_query = """
-                INSERT INTO Attachments (RequestId, FileName, BlobPath, FileSize, ContentType, UploadedDate)
+                INSERT INTO REGOPS_APP.tbl_globi_eu_am_99_Attachments (RequestId, FileName, BlobPath, FileSize, ContentType, UploadedDate)
                 VALUES (?, ?, ?, ?, ?, GETUTCDATE())
             """
             execute_query(insert_query, (
@@ -99,7 +99,7 @@ def download_file(
     token_data: TokenData = Depends(verify_entra_token)
 ):
     # Verify access
-    request_query = "SELECT CustomerNumber, Territory FROM ServiceRequests WHERE Id = ?"
+    request_query = "SELECT CustomerNumber, Territory FROM REGOPS_APP.tbl_globi_eu_am_99_ServiceRequests WHERE Id = ?"
     request_result = execute_query(request_query, (request_id,))
     
     if not request_result:

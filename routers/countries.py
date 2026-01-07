@@ -13,7 +13,7 @@ def get_countries(token_data: TokenData = Depends(verify_entra_token)):
     """
     query = """
         SELECT CountryCode, CountryName, DefaultLanguage, SupportedLanguages
-        FROM Countries
+        FROM REGOPS_APP.tbl_globi_eu_am_99_Countries
         WHERE IsActive = 1
         ORDER BY CountryName
     """
@@ -30,10 +30,10 @@ def get_country_languages(
     """
     query = """
         SELECT LanguageCode, LanguageName
-        FROM Languages
+        FROM REGOPS_APP.tbl_globi_eu_am_99_Languages
         WHERE LanguageCode IN (
             SELECT value
-            FROM Countries
+            FROM REGOPS_APP.tbl_globi_eu_am_99_Countries
             CROSS APPLY OPENJSON(SupportedLanguages)
             WHERE CountryCode = ?
         )
@@ -53,7 +53,7 @@ def get_legal_documents(
     """
     query = """
         SELECT DocumentType, DocumentURL, DocumentContent, Version, EffectiveDate
-        FROM LegalDocuments
+        FROM REGOPS_APP.tbl_globi_eu_am_99_LegalDocuments
         WHERE CountryCode = ?
         AND LanguageCode = ?
         AND IsActive = 1

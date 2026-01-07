@@ -40,7 +40,7 @@ def validate_item(
                 RepairabilityStatus,
                 InstallBaseStatus,
                 EligibilityCountries
-            FROM Items
+            FROM REGOPS_APP.tbl_globi_eu_am_99_Items
             WHERE SerialNumber = ?
         """
         results = execute_query(query, (request.serial_number,))
@@ -64,7 +64,7 @@ def validate_item(
                 RepairabilityStatus,
                 InstallBaseStatus,
                 EligibilityCountries
-            FROM Items
+            FROM REGOPS_APP.tbl_globi_eu_am_99_Items
             WHERE ItemNumber = ?
         """
         results = execute_query(query, (request.item_number,))
@@ -133,8 +133,8 @@ def validate_customer(
             c.ShipToAddress,
             c.PhoneNumber as CustomerPhone,
             c.HasProCareContract
-        FROM CustomerUsers cu
-        INNER JOIN Customers c ON cu.CustomerNumber = c.CustomerNumber
+        FROM REGOPS_APP.tbl_globi_eu_am_99_CustomerUsers cu
+        INNER JOIN REGOPS_APP.tbl_globi_eu_am_99_Customers c ON cu.CustomerNumber = c.CustomerNumber
         WHERE cu.Email = ?
         AND cu.IsActive = 1
         AND c.IsActive = 1

@@ -28,12 +28,12 @@ def get_requests(
     serial_number: Optional[str] = Query(None)
 ):
     query = """
-        SELECT 
+        SELECT
             sr.Id, sr.RequestType, sr.CustomerNumber, sr.Territory,
             sr.SerialNumber, sr.LotNumber, sr.ItemNumber,
             sr.MainReason, sr.SubReason, sr.Details, sr.Status,
             sr.SubmittedDate, sr.SubmittedByEmail, sr.ContactEmail, sr.ContactPhone
-        FROM ServiceRequests sr
+        FROM REGOPS_APP.tbl_globi_eu_am_99_ServiceRequests sr
         WHERE 1=1
     """
     params = []
@@ -90,7 +90,7 @@ def create_request(
         raise HTTPException(400, "Customer number not found")
     
     # Get territory
-    territory_query = "SELECT TOP 1 Territory FROM CustomerTerritories WHERE CustomerNumber = ?"
+    territory_query = "SELECT TOP 1 Territory FROM REGOPS_APP.tbl_globi_eu_am_99_CustomerTerritories WHERE CustomerNumber = ?"
     territory_result = execute_query(territory_query, (customer_number,))
     territory = territory_result[0]['Territory'] if territory_result else 'UNKNOWN'
     
@@ -100,7 +100,7 @@ def create_request(
     
     # Insert
     insert_query = """
-        INSERT INTO ServiceRequests (
+        INSERT INTO REGOPS_APP.tbl_globi_eu_am_99_ServiceRequests (
             RequestType, CustomerNumber, Territory, SerialNumber,
             LotNumber, ItemNumber, MainReason, SubReason, Details,
             ContactEmail, ContactPhone, SubmittedByEmail, Status, SubmittedDate
@@ -138,7 +138,7 @@ def get_request_detail(
 ):
     query = """
         SELECT sr.*
-        FROM ServiceRequests sr
+        FROM REGOPS_APP.tbl_globi_eu_am_99_ServiceRequests sr
         WHERE sr.Id = ?
     """
     
@@ -161,7 +161,7 @@ def get_request_detail(
     # Get attachments
     attachments_query = """
         SELECT Id, FileName, BlobPath, FileSize, ContentType, UploadedDate
-        FROM Attachments
+        FROM REGOPS_APP.tbl_globi_eu_am_99_Attachments
         WHERE RequestId = ?
         ORDER BY UploadedDate DESC
     """
@@ -183,7 +183,7 @@ def update_request_status(
     
     # RBAC for SalesTech
     if token_data.role == Roles.SALES_TECH:
-        check_query = "SELECT Territory FROM ServiceRequests WHERE Id = ?"
+        check_query = "SELECT Territory FROM REGOPS_APP.tbl_globi_eu_am_99_ServiceRequests WHERE Id = ?"
         result = execute_query(check_query, (request_id,))
         
         if not result:
@@ -194,7 +194,7 @@ def update_request_status(
     
     # Update
     update_query = """
-        UPDATE ServiceRequests
+        UPDATE REGOPS_APP.tbl_globi_eu_am_99_ServiceRequests
         SET Status = ?, LastModifiedDate = GETUTCDATE()
         WHERE Id = ?
     """
