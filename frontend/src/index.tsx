@@ -1,8 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-// Use simplified App without OAuth for demo/PoC
-import App from './App-Simple';
+// Use new Ticketing System App
+import TicketingApp from './TicketingApp';
 import reportWebVitals from './reportWebVitals';
 
 const root = ReactDOM.createRoot(
@@ -10,7 +10,7 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <React.StrictMode>
-    <App />
+    <TicketingApp />
   </React.StrictMode>
 );
 

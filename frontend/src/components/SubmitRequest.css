@@ -1,0 +1,238 @@
+/* Submit Request Styles */
+
+.submit-request {
+  flex: 1;
+  padding: 2rem;
+  background: #f8f9fa;
+  overflow-y: auto;
+  animation: slideInRight 0.4s ease-out;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.submit-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+}
+
+.submit-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--stryker-black);
+  margin: 0 0 0.5rem 0;
+}
+
+.submit-header p {
+  font-size: 1rem;
+  color: var(--stryker-dark-gray);
+  margin: 0;
+}
+
+.btn-close {
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: 2px solid var(--stryker-gray);
+  border-radius: 50%;
+  color: var(--stryker-dark-gray);
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  line-height: 1;
+}
+
+.btn-close:hover {
+  background: #ffebee;
+  border-color: #c62828;
+  color: #c62828;
+}
+
+.submit-form {
+  background: var(--stryker-white);
+  border-radius: 16px;
+  padding: 2.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-field label {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--stryker-black);
+}
+
+.form-field input,
+.form-field select,
+.form-field textarea {
+  padding: 0.875rem 1rem;
+  font-size: 1rem;
+  border: 2px solid var(--stryker-gray);
+  border-radius: 8px;
+  font-family: var(--font-primary);
+  transition: all 0.2s ease;
+}
+
+.form-field input:focus,
+.form-field select:focus,
+.form-field textarea:focus {
+  outline: none;
+  border-color: var(--stryker-gold);
+  box-shadow: 0 0 0 3px rgba(255, 181, 0, 0.1);
+}
+
+.form-field textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.file-drop-zone {
+  position: relative;
+  border: 3px dashed var(--stryker-gray);
+  border-radius: 12px;
+  padding: 3rem 2rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.file-drop-zone:hover,
+.file-drop-zone.dragging {
+  border-color: var(--stryker-gold);
+  background: #fffbf2;
+}
+
+.file-drop-zone input[type="file"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.drop-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.file-drop-zone p {
+  font-size: 1rem;
+  color: var(--stryker-dark-gray);
+  margin: 0;
+}
+
+.file-list {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.file-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  font-size: 0.9375rem;
+}
+
+.file-item button {
+  background: transparent;
+  border: none;
+  color: #c62828;
+  cursor: pointer;
+  font-size: 1.25rem;
+  padding: 0.25rem;
+  transition: transform 0.2s ease;
+}
+
+.file-item button:hover {
+  transform: scale(1.2);
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e9ecef;
+}
+
+.btn-cancel,
+.btn-submit {
+  padding: 0.875rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.btn-cancel {
+  background: transparent;
+  border: 2px solid var(--stryker-gray);
+  color: var(--stryker-dark-gray);
+}
+
+.btn-cancel:hover {
+  background: #f5f5f5;
+}
+
+.btn-submit {
+  background: var(--stryker-gold);
+  color: var(--stryker-black);
+}
+
+.btn-submit:hover {
+  background: var(--stryker-orange);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 181, 0, 0.3);
+}
+
+@media (max-width: 768px) {
+  .submit-request {
+    padding: 1.5rem;
+  }
+
+  .submit-form {
+    padding: 1.5rem;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+  }
+
+  .btn-cancel,
+  .btn-submit {
+    width: 100%;
+  }
+}
