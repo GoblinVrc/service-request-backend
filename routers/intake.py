@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from typing import Optional, List
 from pydantic import BaseModel, EmailStr, validator
-from datetime import datetime
+from datetime import datetime, date
 from auth import verify_entra_token, TokenData
 from database import execute_query, get_db_connection
 
@@ -39,7 +39,7 @@ class ServiceRequestCreate(BaseModel):
     issue_description: Optional[str] = None
 
     # Service Details
-    requested_service_date: Optional[datetime] = None
+    requested_service_date: Optional[date] = None
     urgency_level: Optional[str] = 'Normal'
 
     # Additional Services
