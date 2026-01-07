@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import apiService from '../services/apiService';
+import { ServiceRequest } from '../types';
 import './Dashboard.css';
 
 interface Ticket {
@@ -23,61 +25,33 @@ const Dashboard: React.FC<DashboardProps> = ({ onTicketClick, filters }) => {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Mock data - In production, fetch from API
+  // Load service requests from API
   useEffect(() => {
-    const mockTickets: Ticket[] = [
-      {
-        id: 'SR-2026-001',
-        subject: 'Equipment malfunction in OR-3',
-        status: 'Open',
-        date: '2026-01-07',
-        assignee: 'John Smith',
-        priority: 'Critical',
-        category: 'Equipment',
-        location: 'Operating Room 3',
-      },
-      {
-        id: 'SR-2026-002',
-        subject: 'Routine maintenance required',
-        status: 'In Progress',
-        date: '2026-01-06',
-        assignee: 'Sarah Johnson',
-        priority: 'Normal',
-        category: 'Maintenance',
-        location: 'Lab A',
-      },
-      {
-        id: 'SR-2026-003',
-        subject: 'Power supply issue',
-        status: 'Open',
-        date: '2026-01-06',
-        assignee: 'Mike Davis',
-        priority: 'High',
-        category: 'Electrical',
-        location: 'ICU',
-      },
-      {
-        id: 'SR-2026-004',
-        subject: 'Software update needed',
-        status: 'Resolved',
-        date: '2026-01-05',
-        assignee: 'Emily Chen',
-        priority: 'Low',
-        category: 'Software',
-        location: 'Radiology',
-      },
-      {
-        id: 'SR-2026-005',
-        subject: 'Calibration service',
-        status: 'In Progress',
-        date: '2026-01-05',
-        assignee: 'Robert Lee',
-        priority: 'Normal',
-        category: 'Calibration',
-        location: 'ER',
-      },
-    ];
-    setTickets(mockTickets);
+    const loadRequests = async () => {
+      try {
+        const requests = await apiService.get<ServiceRequest[]>('/api/requests');
+
+        // Convert ServiceRequest to Ticket format
+        const convertedTickets: Ticket[] = requests.map(req => ({
+          id: req.RequestCode,
+          subject: req.ItemDescription || req.MainReason || 'Service Request',
+          status: req.Status === 'Submitted' ? 'Open' : req.Status as any,
+          date: new Date(req.SubmittedDate).toISOString().split('T')[0],
+          assignee: req.Territory || 'Unassigned',
+          priority: req.UrgencyLevel,
+          category: req.MainReason,
+          location: req.SiteAddress || req.CountryCode,
+        }));
+
+        setTickets(convertedTickets);
+      } catch (error) {
+        console.error('Failed to load requests:', error);
+        // Keep empty array on error
+        setTickets([]);
+      }
+    };
+
+    loadRequests();
   }, []);
 
   // Apply filters

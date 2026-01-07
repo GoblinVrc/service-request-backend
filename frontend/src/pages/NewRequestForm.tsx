@@ -17,7 +17,11 @@ interface IssueType {
   sub_reasons: string[];
 }
 
-const NewRequestForm: React.FC = () => {
+interface NewRequestFormProps {
+  onBackToDashboard?: () => void;
+}
+
+const NewRequestForm: React.FC<NewRequestFormProps> = ({ onBackToDashboard }) => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -218,7 +222,12 @@ const NewRequestForm: React.FC = () => {
       const response = (await apiService.post(API_ENDPOINTS.SUBMIT_REQUEST, submitData)) as SubmitResponse;
 
       alert(`Request submitted successfully!\nRequest Code: ${response.request_code}\n\n${response.next_steps}`);
-      navigate('/dashboard');
+
+      if (onBackToDashboard) {
+        onBackToDashboard();
+      } else {
+        navigate('/dashboard');
+      }
     } catch (error: any) {
       console.error('Failed to submit request:', error);
       setValidationMessage(error.response?.data?.detail || 'Failed to submit request. Please try again.');
@@ -505,7 +514,10 @@ const NewRequestForm: React.FC = () => {
   return (
     <div className="new-request-container">
       <div className="form-header">
-        <button onClick={() => navigate('/dashboard')} className="btn-back">
+        <button
+          onClick={() => onBackToDashboard ? onBackToDashboard() : navigate('/dashboard')}
+          className="btn-back"
+        >
           ← Back to Dashboard
         </button>
         <h1>New Service Request</h1>

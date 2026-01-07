@@ -16,6 +16,18 @@
   transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Full-page form container */
+.full-page-form {
+  flex: 1;
+  overflow-y: auto;
+  background: #f8f9fa;
+}
+
+.full-page-form .new-request-container {
+  margin-left: 0;
+  max-width: 100%;
+}
+
 /* Coming Soon Placeholder */
 .coming-soon {
   flex: 1;

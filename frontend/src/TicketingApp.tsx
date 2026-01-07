@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import LoginScreen from './components/LoginScreen';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
-import SubmitRequest from './components/SubmitRequest';
+import NewRequestForm from './pages/NewRequestForm';
 import TicketDetail from './components/TicketDetail';
 import './TicketingApp.css';
 
@@ -37,12 +37,7 @@ const TicketingApp: React.FC = () => {
     setCurrentView('detail');
   };
 
-  const handleSubmitRequest = () => {
-    alert('Request submitted successfully!');
-    setCurrentView('dashboard');
-  };
-
-  const handleCancelSubmit = () => {
+  const handleBackToDashboard = () => {
     setCurrentView('dashboard');
   };
 
@@ -85,7 +80,9 @@ const TicketingApp: React.FC = () => {
         )}
 
         {currentView === 'submit' && (
-          <SubmitRequest onSubmit={handleSubmitRequest} onCancel={handleCancelSubmit} />
+          <div className="full-page-form">
+            <NewRequestForm onBackToDashboard={handleBackToDashboard} />
+          </div>
         )}
 
         {currentView === 'detail' && selectedTicketId && (
