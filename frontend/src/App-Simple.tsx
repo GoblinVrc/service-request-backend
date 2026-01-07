@@ -7,15 +7,27 @@ import './App.css';
 
 // Simplified App without MSAL for demo/PoC
 function AppSimple() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // Initialize from localStorage immediately
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    const authStatus = localStorage.getItem('isAuthenticated');
+    console.log('App-Simple: Initial auth check =', authStatus);
+    return authStatus === 'true';
+  });
 
   useEffect(() => {
-    // Check if user is authenticated
-    const authStatus = localStorage.getItem('isAuthenticated');
-    setIsAuthenticated(authStatus === 'true');
+    // Listen for auth changes
+    const handleStorageChange = () => {
+      const authStatus = localStorage.getItem('isAuthenticated');
+      console.log('App-Simple: Storage changed, isAuthenticated =', authStatus);
+      setIsAuthenticated(authStatus === 'true');
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   const ProtectedRoute = ({ children }: { children: React.ReactElement }) => {
+    console.log('ProtectedRoute: isAuthenticated =', isAuthenticated);
     return isAuthenticated ? children : <Navigate to="/login" replace />;
   };
 
