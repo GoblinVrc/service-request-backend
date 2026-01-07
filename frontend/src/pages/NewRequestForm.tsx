@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import apiService from '../services/apiService';
 import { API_ENDPOINTS } from '../config/apiConfig';
+import { SubmitResponse } from '../types';
 import './NewRequestForm.css';
 
 interface Item {
@@ -214,7 +215,7 @@ const NewRequestForm: React.FC = () => {
         submitted_by_name: formData.contact_name,
       };
 
-      const response = await apiService.post(API_ENDPOINTS.SUBMIT_REQUEST, submitData);
+      const response = (await apiService.post(API_ENDPOINTS.SUBMIT_REQUEST, submitData)) as SubmitResponse;
 
       alert(`Request submitted successfully!\nRequest Code: ${response.request_code}\n\n${response.next_steps}`);
       navigate('/dashboard');
