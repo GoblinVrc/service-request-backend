@@ -17,23 +17,22 @@ interface Item {
 }
 
 const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => {
-  const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [validationMessage, setValidationMessage] = useState('');
 
   // Form data
   const [formData, setFormData] = useState({
-    // Step 1: Item
+    // Item
     item_number: '',
     serial_number: '',
     item_description: '',
     product_family: '',
 
-    // Step 2: Issue type
+    // Issue type
     main_reason: '',
     sub_reason: '',
 
-    // Step 3: Details
+    // Details
     issue_description: '',
     contact_phone: '',
     urgency_level: 'Normal',
@@ -170,52 +169,36 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
     setAvailableSubReasons(issueReasons[mainReason] || []);
   };
 
-  const validateStep = () => {
+  const validateForm = () => {
     setValidationMessage('');
 
-    if (currentStep === 1) {
-      if (!formData.item_number && !formData.serial_number) {
-        setValidationMessage('Please select an item');
-        return false;
-      }
+    if (!formData.item_number && !formData.serial_number) {
+      setValidationMessage('Please select an item');
+      return false;
     }
 
-    if (currentStep === 2) {
-      if (!formData.main_reason) {
-        setValidationMessage('Please select an issue type');
-        return false;
-      }
+    if (!formData.main_reason) {
+      setValidationMessage('Please select an issue type');
+      return false;
     }
 
-    if (currentStep === 3) {
-      if (!formData.issue_description || formData.issue_description.trim().length < 10) {
-        setValidationMessage('Please provide a detailed description (at least 10 characters)');
-        return false;
-      }
-      if (!formData.contact_phone) {
-        setValidationMessage('Please provide a contact phone number');
-        return false;
-      }
+    if (!formData.issue_description || formData.issue_description.trim().length < 10) {
+      setValidationMessage('Please provide a detailed description (at least 10 characters)');
+      return false;
+    }
+
+    if (!formData.contact_phone) {
+      setValidationMessage('Please provide a contact phone number');
+      return false;
     }
 
     return true;
   };
 
-  const handleNext = () => {
-    if (validateStep()) {
-      setCurrentStep(prev => Math.min(prev + 1, 4));
-    }
-  };
-
-  const handleBack = () => {
-    setCurrentStep(prev => Math.max(prev - 1, 1));
-    setValidationMessage('');
-  };
-
   const handleFinalSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validateStep()) return;
+    if (!validateForm()) return;
 
     setLoading(true);
     try {
@@ -257,198 +240,6 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
     }
   };
 
-  const renderStep1 = () => (
-    <div className="form-step">
-      <h3>Step 1: Select Item</h3>
-      <p className="step-desc">Search for the item by serial number or item number</p>
-
-      <div className="form-field">
-        <label>Search Item *</label>
-        <div className="autocomplete-wrapper">
-          <input
-            type="text"
-            value={itemSearchTerm}
-            onChange={(e) => handleItemSearch(e.target.value)}
-            onFocus={() => filteredItems.length > 0 && setShowItemDropdown(true)}
-            placeholder="Enter serial number or item number..."
-            className="form-input"
-          />
-
-          {showItemDropdown && filteredItems.length > 0 && (
-            <div className="autocomplete-results">
-              {filteredItems.map((item, index) => (
-                <div
-                  key={index}
-                  className="autocomplete-result-item"
-                  onClick={() => handleSelectItem(item)}
-                >
-                  <div className="item-info">
-                    {item.serial_number && <span className="item-badge">SN: {item.serial_number}</span>}
-                    <span className="item-badge">Item: {item.item_number}</span>
-                  </div>
-                  <div className="item-desc">{item.item_description}</div>
-                  {item.product_family && <div className="item-family">{item.product_family}</div>}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {formData.item_number && (
-        <div className="selected-item">
-          <h4>Selected Item</h4>
-          <div className="item-details">
-            {formData.serial_number && <p><strong>Serial Number:</strong> {formData.serial_number}</p>}
-            <p><strong>Item Number:</strong> {formData.item_number}</p>
-            <p><strong>Description:</strong> {formData.item_description}</p>
-            {formData.product_family && <p><strong>Product Family:</strong> {formData.product_family}</p>}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-
-  const renderStep2 = () => (
-    <div className="form-step">
-      <h3>Step 2: Issue Type</h3>
-      <p className="step-desc">Select the type of issue you're experiencing</p>
-
-      <div className="form-field">
-        <label>Main Issue Type *</label>
-        <select
-          value={formData.main_reason}
-          onChange={(e) => handleMainReasonChange(e.target.value)}
-          className="form-input"
-        >
-          <option value="">Select main issue type...</option>
-          {Object.keys(issueReasons).map(reason => (
-            <option key={reason} value={reason}>{reason}</option>
-          ))}
-        </select>
-      </div>
-
-      {availableSubReasons.length > 0 && (
-        <div className="form-field">
-          <label>Sub-Issue Type</label>
-          <select
-            value={formData.sub_reason}
-            onChange={(e) => setFormData(prev => ({ ...prev, sub_reason: e.target.value }))}
-            className="form-input"
-          >
-            <option value="">Select sub-issue type (optional)...</option>
-            {availableSubReasons.map(subReason => (
-              <option key={subReason} value={subReason}>{subReason}</option>
-            ))}
-          </select>
-        </div>
-      )}
-    </div>
-  );
-
-  const renderStep3 = () => (
-    <div className="form-step">
-      <h3>Step 3: Additional Details</h3>
-      <p className="step-desc">Provide more information about your service request</p>
-
-      <div className="form-field">
-        <label>Issue Description *</label>
-        <textarea
-          value={formData.issue_description}
-          onChange={(e) => setFormData(prev => ({ ...prev, issue_description: e.target.value }))}
-          placeholder="Please describe the issue in detail..."
-          rows={5}
-          className="form-input"
-        />
-      </div>
-
-      <div className="form-row">
-        <div className="form-field">
-          <label>Contact Phone *</label>
-          <input
-            type="tel"
-            value={formData.contact_phone}
-            onChange={(e) => setFormData(prev => ({ ...prev, contact_phone: e.target.value }))}
-            placeholder="e.g., +1-555-123-4567"
-            className="form-input"
-          />
-        </div>
-
-        <div className="form-field">
-          <label>Urgency Level *</label>
-          <select
-            value={formData.urgency_level}
-            onChange={(e) => setFormData(prev => ({ ...prev, urgency_level: e.target.value }))}
-            className="form-input"
-          >
-            <option value="Normal">Normal</option>
-            <option value="Urgent">Urgent</option>
-            <option value="Critical">Critical</option>
-          </select>
-        </div>
-      </div>
-
-      <div className="form-field">
-        <label>Requested Service Date</label>
-        <input
-          type="date"
-          value={formData.requested_service_date}
-          onChange={(e) => setFormData(prev => ({ ...prev, requested_service_date: e.target.value }))}
-          className="form-input"
-          min={new Date().toISOString().split('T')[0]}
-        />
-      </div>
-
-      <div className="form-field">
-        <label className="checkbox-wrapper">
-          <input
-            type="checkbox"
-            checked={formData.loaner_required}
-            onChange={(e) => setFormData(prev => ({ ...prev, loaner_required: e.target.checked }))}
-          />
-          <span>Loaner equipment required</span>
-        </label>
-      </div>
-    </div>
-  );
-
-  const renderStep4 = () => (
-    <div className="form-step">
-      <h3>Step 4: Review & Submit</h3>
-      <p className="step-desc">Please review your information before submitting</p>
-
-      <div className="review-section">
-        <h4>Item Information</h4>
-        <div className="review-content">
-          {formData.serial_number && <p><strong>Serial Number:</strong> {formData.serial_number}</p>}
-          <p><strong>Item Number:</strong> {formData.item_number}</p>
-          <p><strong>Description:</strong> {formData.item_description}</p>
-          {formData.product_family && <p><strong>Product Family:</strong> {formData.product_family}</p>}
-        </div>
-      </div>
-
-      <div className="review-section">
-        <h4>Issue Details</h4>
-        <div className="review-content">
-          <p><strong>Main Issue:</strong> {formData.main_reason}</p>
-          {formData.sub_reason && <p><strong>Sub-Issue:</strong> {formData.sub_reason}</p>}
-          <p><strong>Description:</strong> {formData.issue_description}</p>
-          <p><strong>Urgency:</strong> <span className={`urgency-badge urgency-${formData.urgency_level.toLowerCase()}`}>{formData.urgency_level}</span></p>
-          {formData.loaner_required && <p><strong>Loaner Required:</strong> Yes</p>}
-        </div>
-      </div>
-
-      <div className="review-section">
-        <h4>Contact Information</h4>
-        <div className="review-content">
-          <p><strong>Name:</strong> {formData.contact_name}</p>
-          <p><strong>Email:</strong> {formData.contact_email}</p>
-          <p><strong>Phone:</strong> {formData.contact_phone}</p>
-        </div>
-      </div>
-    </div>
-  );
-
   return (
     <div className="submit-request">
       <div className="submit-header">
@@ -459,26 +250,155 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
         <button onClick={onCancel} className="btn-close">✕</button>
       </div>
 
-      {/* Step indicator */}
-      <div className="step-progress">
-        {[1, 2, 3, 4].map(step => (
-          <div key={step} className={`progress-step ${currentStep >= step ? 'active' : ''} ${currentStep === step ? 'current' : ''}`}>
-            <div className="step-circle">{step}</div>
-            <div className="step-title">
-              {step === 1 && 'Item'}
-              {step === 2 && 'Issue Type'}
-              {step === 3 && 'Details'}
-              {step === 4 && 'Review'}
+      <form onSubmit={handleFinalSubmit} className="submit-form">
+        {/* Item Selection */}
+        <div className="form-section">
+          <h3>Item Information</h3>
+
+          <div className="form-field">
+            <label>Search Item *</label>
+            <div className="autocomplete-wrapper">
+              <input
+                type="text"
+                value={itemSearchTerm}
+                onChange={(e) => handleItemSearch(e.target.value)}
+                onFocus={() => filteredItems.length > 0 && setShowItemDropdown(true)}
+                placeholder="Enter serial number or item number..."
+                className="form-input"
+              />
+
+              {showItemDropdown && filteredItems.length > 0 && (
+                <div className="autocomplete-results">
+                  {filteredItems.map((item, index) => (
+                    <div
+                      key={index}
+                      className="autocomplete-result-item"
+                      onClick={() => handleSelectItem(item)}
+                    >
+                      <div className="item-info">
+                        {item.serial_number && <span className="item-badge">SN: {item.serial_number}</span>}
+                        <span className="item-badge">Item: {item.item_number}</span>
+                      </div>
+                      <div className="item-desc">{item.item_description}</div>
+                      {item.product_family && <div className="item-family">{item.product_family}</div>}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
-        ))}
-      </div>
 
-      <form onSubmit={handleFinalSubmit} className="submit-form">
-        {currentStep === 1 && renderStep1()}
-        {currentStep === 2 && renderStep2()}
-        {currentStep === 3 && renderStep3()}
-        {currentStep === 4 && renderStep4()}
+          {formData.item_number && (
+            <div className="selected-item">
+              <h4>Selected Item</h4>
+              <div className="item-details">
+                {formData.serial_number && <p><strong>Serial Number:</strong> {formData.serial_number}</p>}
+                <p><strong>Item Number:</strong> {formData.item_number}</p>
+                <p><strong>Description:</strong> {formData.item_description}</p>
+                {formData.product_family && <p><strong>Product Family:</strong> {formData.product_family}</p>}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Issue Type */}
+        <div className="form-section">
+          <h3>Issue Type</h3>
+
+          <div className="form-field">
+            <label>Main Issue Type *</label>
+            <select
+              value={formData.main_reason}
+              onChange={(e) => handleMainReasonChange(e.target.value)}
+              className="form-input"
+            >
+              <option value="">Select main issue type...</option>
+              {Object.keys(issueReasons).map(reason => (
+                <option key={reason} value={reason}>{reason}</option>
+              ))}
+            </select>
+          </div>
+
+          {availableSubReasons.length > 0 && (
+            <div className="form-field">
+              <label>Sub-Issue Type</label>
+              <select
+                value={formData.sub_reason}
+                onChange={(e) => setFormData(prev => ({ ...prev, sub_reason: e.target.value }))}
+                className="form-input"
+              >
+                <option value="">Select sub-issue type (optional)...</option>
+                {availableSubReasons.map(subReason => (
+                  <option key={subReason} value={subReason}>{subReason}</option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
+
+        {/* Additional Details */}
+        <div className="form-section">
+          <h3>Additional Details</h3>
+
+          <div className="form-field">
+            <label>Issue Description *</label>
+            <textarea
+              value={formData.issue_description}
+              onChange={(e) => setFormData(prev => ({ ...prev, issue_description: e.target.value }))}
+              placeholder="Please describe the issue in detail..."
+              rows={5}
+              className="form-input"
+            />
+          </div>
+
+          <div className="form-row">
+            <div className="form-field">
+              <label>Contact Phone *</label>
+              <input
+                type="tel"
+                value={formData.contact_phone}
+                onChange={(e) => setFormData(prev => ({ ...prev, contact_phone: e.target.value }))}
+                placeholder="e.g., +1-555-123-4567"
+                className="form-input"
+              />
+            </div>
+
+            <div className="form-field">
+              <label>Urgency Level *</label>
+              <select
+                value={formData.urgency_level}
+                onChange={(e) => setFormData(prev => ({ ...prev, urgency_level: e.target.value }))}
+                className="form-input"
+              >
+                <option value="Normal">Normal</option>
+                <option value="Urgent">Urgent</option>
+                <option value="Critical">Critical</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="form-field">
+            <label>Requested Service Date</label>
+            <input
+              type="date"
+              value={formData.requested_service_date}
+              onChange={(e) => setFormData(prev => ({ ...prev, requested_service_date: e.target.value }))}
+              className="form-input"
+              min={new Date().toISOString().split('T')[0]}
+            />
+          </div>
+
+          <div className="form-field">
+            <label className="checkbox-wrapper">
+              <input
+                type="checkbox"
+                checked={formData.loaner_required}
+                onChange={(e) => setFormData(prev => ({ ...prev, loaner_required: e.target.checked }))}
+              />
+              <span>Loaner equipment required</span>
+            </label>
+          </div>
+        </div>
 
         {validationMessage && (
           <div className="validation-error">
@@ -490,24 +410,9 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
           <button type="button" onClick={onCancel} className="btn-cancel">
             Cancel
           </button>
-
-          <div className="nav-buttons">
-            {currentStep > 1 && (
-              <button type="button" onClick={handleBack} className="btn-back" disabled={loading}>
-                ← Back
-              </button>
-            )}
-
-            {currentStep < 4 ? (
-              <button type="button" onClick={handleNext} className="btn-next">
-                Next →
-              </button>
-            ) : (
-              <button type="submit" className="btn-submit" disabled={loading}>
-                {loading ? 'Submitting...' : 'Submit Request'}
-              </button>
-            )}
-          </div>
+          <button type="submit" className="btn-submit" disabled={loading}>
+            {loading ? 'Submitting...' : 'Submit Request'}
+          </button>
         </div>
       </form>
     </div>

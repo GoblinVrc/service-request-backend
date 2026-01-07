@@ -3,7 +3,7 @@
 ## Current Setup
 
 - **Frontend**: Vercel (https://service-request-backend-three.vercel.app)
-- **Backend**: Render (your-backend-url.onrender.com)
+- **Backend**: Render (https://service-request-backend-1.onrender.com)
 - **Database**: Supabase PostgreSQL
 
 ## Required Environment Variables
@@ -22,7 +22,7 @@ DEMO_MODE=true
 Set these in Vercel Dashboard → Settings → Environment Variables:
 
 ```
-REACT_APP_API_URL=https://your-backend-url.onrender.com
+REACT_APP_API_URL=https://service-request-backend-1.onrender.com
 ```
 
 **IMPORTANT**: After adding `REACT_APP_API_URL` in Vercel, you need to:
