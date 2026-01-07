@@ -1,14 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useMsal } from '@azure/msal-react';
-import apiService from '../services/apiService';
-import { API_ENDPOINTS } from '../config/apiConfig';
 import { ServiceRequest, User } from '../types';
 import './Dashboard.css';
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { instance } = useMsal();
   const [user, setUser] = useState<User | null>(null);
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [loading, setLoading] = useState(true);
@@ -23,13 +19,16 @@ const Dashboard: React.FC = () => {
 
   const loadData = async () => {
     try {
-      // Load user profile
-      const userProfile = await apiService.get<User>(API_ENDPOINTS.AUTH_ME);
-      setUser(userProfile);
+      // Load user from localStorage (demo mode)
+      const userStr = localStorage.getItem('user');
+      if (userStr) {
+        const userProfile = JSON.parse(userStr);
+        setUser(userProfile);
+      }
 
-      // Load service requests
-      const requestsData = await apiService.get<ServiceRequest[]>(API_ENDPOINTS.REQUESTS);
-      setRequests(requestsData);
+      // Load service requests (mock data for demo)
+      // In production, call: apiService.get<ServiceRequest[]>(API_ENDPOINTS.REQUESTS)
+      setRequests([]);
     } catch (error) {
       console.error('Failed to load data:', error);
     } finally {
@@ -38,7 +37,9 @@ const Dashboard: React.FC = () => {
   };
 
   const handleLogout = () => {
-    instance.logoutPopup();
+    localStorage.removeItem('user');
+    localStorage.removeItem('isAuthenticated');
+    navigate('/login');
   };
 
   const handleNewRequest = () => {

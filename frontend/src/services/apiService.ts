@@ -40,12 +40,11 @@ class ApiService {
   }
 
   private getAccessToken(): string | null {
-    // Get token from MSAL
-    const accounts = JSON.parse(localStorage.getItem('msal.account.keys') || '[]');
-    if (accounts.length > 0) {
-      const accountKey = accounts[0];
-      const tokenKey = `${accountKey}.idtoken`;
-      return localStorage.getItem(tokenKey);
+    // For demo/PoC - use simple auth from localStorage
+    const user = localStorage.getItem('user');
+    if (user) {
+      // Return mock token (in production, get real token from backend)
+      return 'demo-token-' + btoa(user);
     }
     return null;
   }
