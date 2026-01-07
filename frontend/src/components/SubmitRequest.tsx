@@ -224,8 +224,6 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
         urgency_level: formData.urgency_level,
         loaner_required: formData.loaner_required,
         requested_service_date: formData.requested_service_date || undefined,
-        submitted_by_email: formData.contact_email,
-        submitted_by_name: formData.contact_name,
       };
 
       const response = (await apiService.post(API_ENDPOINTS.SUBMIT_REQUEST, submitData)) as SubmitResponse;
