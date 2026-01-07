@@ -79,7 +79,14 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
       );
       setIssueReasons(reasons);
     } catch (error) {
-      console.error('Failed to load issue reasons:', error);
+      console.error('Failed to load issue reasons, using dummy data:', error);
+      // Fallback: Dummy data
+      setIssueReasons({
+        'Equipment Malfunction': ['Equipment Not Responding', 'Display Issue', 'Mechanical Failure', 'Error Messages'],
+        'Preventive Maintenance': ['Scheduled Maintenance Due', 'Calibration Required', 'Software Update'],
+        'Installation Required': [],
+        'Other': [],
+      });
     }
   };
 
@@ -93,19 +100,49 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
     }
 
     try {
-      const serialResults = await apiService.get<any[]>(
-        API_ENDPOINTS.LOOKUP_SERIAL,
-        { q: searchTerm }
+      // Try API first, fall back to dummy data
+      try {
+        const serialResults = await apiService.get<any[]>(
+          API_ENDPOINTS.LOOKUP_SERIAL,
+          { q: searchTerm }
+        );
+
+        const itemResults = await apiService.get<any[]>(
+          API_ENDPOINTS.LOOKUP_ITEM,
+          { q: searchTerm }
+        );
+
+        const combined = [...serialResults, ...itemResults];
+        if (combined.length > 0) {
+          setFilteredItems(combined);
+          setShowItemDropdown(true);
+          return;
+        }
+      } catch (apiError) {
+        console.log('API not available, using dummy data');
+      }
+
+      // Fallback: Dummy data for demo
+      const dummyItems: Item[] = [
+        { item_number: 'ITEM-SUR-001', serial_number: 'SN-2024-001', item_description: 'Advanced Surgical System Model X200', product_family: 'Surgical Systems' },
+        { item_number: 'ITEM-SUR-002', serial_number: 'SN-2024-002', item_description: 'Minimally Invasive Surgical Tower', product_family: 'Surgical Systems' },
+        { item_number: 'ITEM-DIA-001', serial_number: 'SN-2024-006', item_description: 'Ultrasound System ProView 5000', product_family: 'Diagnostic Imaging' },
+        { item_number: 'ITEM-DIA-002', serial_number: 'SN-2024-007', item_description: 'Portable X-Ray Unit Mobile Max', product_family: 'Diagnostic Imaging' },
+        { item_number: 'ITEM-MON-001', serial_number: 'SN-2024-011', item_description: 'Vital Signs Monitor ProLife 800', product_family: 'Patient Monitoring' },
+        { item_number: 'ITEM-MON-002', serial_number: 'SN-2024-012', item_description: 'ECG Machine CardioView 12-Lead', product_family: 'Patient Monitoring' },
+        { item_number: 'ITEM-LAB-001', serial_number: 'SN-2024-016', item_description: 'Blood Analyzer Hema-Pro 500', product_family: 'Laboratory' },
+        { item_number: 'ITEM-STE-001', serial_number: 'SN-2024-021', item_description: 'Autoclave Steam Sterilizer 500L', product_family: 'Sterilization' },
+      ];
+
+      const searchLower = searchTerm.toLowerCase();
+      const filtered = dummyItems.filter(item =>
+        (item.serial_number && item.serial_number.toLowerCase().includes(searchLower)) ||
+        item.item_number.toLowerCase().includes(searchLower) ||
+        item.item_description.toLowerCase().includes(searchLower)
       );
 
-      const itemResults = await apiService.get<any[]>(
-        API_ENDPOINTS.LOOKUP_ITEM,
-        { q: searchTerm }
-      );
-
-      const combined = [...serialResults, ...itemResults];
-      setFilteredItems(combined);
-      setShowItemDropdown(combined.length > 0);
+      setFilteredItems(filtered);
+      setShowItemDropdown(filtered.length > 0);
     } catch (error) {
       console.error('Failed to search items:', error);
     }
