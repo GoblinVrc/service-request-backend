@@ -1,10 +1,35 @@
+/* Stryker Brand Guidelines 2025 - Global Styles */
+
+:root {
+  /* Primary Color Palette */
+  --stryker-gold: #FFB500;
+  --stryker-gray: #B2B4AE;
+  --stryker-black: #000000;
+  --stryker-white: #FFFFFF;
+
+  /* Complementary Color Palette */
+  --stryker-orange: #AF6D04;
+  --stryker-purple: #85458A;
+  --stryker-blue: #1C5687;
+  --stryker-teal: #4C7D7A;
+  --stryker-dark-gray: #545857;
+
+  /* Gradient Colors */
+  --stryker-gradient-gold: linear-gradient(90deg, #FFB500 0%, #FFFFFF 80%);
+  --stryker-gradient-gray: linear-gradient(90deg, #B2B4AE 0%, #FFFFFF 80%);
+
+  /* Typography - Using system fonts as brand fonts require licensing */
+  --font-primary: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+}
+
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: var(--font-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background: var(--stryker-white);
+  color: var(--stryker-black);
 }
 
 code {

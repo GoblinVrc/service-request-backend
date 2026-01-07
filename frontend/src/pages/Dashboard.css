@@ -1,16 +1,17 @@
+/* Stryker Brand - Dashboard Page */
 .dashboard-container {
   min-height: 100vh;
-  background: #f5f7fa;
+  background: var(--stryker-white);
 }
 
 .dashboard-header {
-  background: white;
-  border-bottom: 2px solid #e1e8ed;
+  background: var(--stryker-gradient-gold);
+  border-bottom: 0;
   padding: 0;
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .header-content {
@@ -25,13 +26,13 @@
 .header-left h1 {
   margin: 0;
   font-size: 24px;
-  color: #1a1a1a;
+  color: var(--stryker-black);
   font-weight: 600;
 }
 
 .header-subtitle {
   margin: 4px 0 0;
-  color: #666;
+  color: var(--stryker-dark-gray);
   font-size: 13px;
 }
 
@@ -49,30 +50,32 @@
 
 .user-name {
   font-weight: 500;
-  color: #1a1a1a;
+  color: var(--stryker-black);
   font-size: 14px;
 }
 
 .user-role {
   font-size: 12px;
-  color: #666;
+  color: var(--stryker-dark-gray);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .btn-logout {
   padding: 8px 20px;
-  background: #f8f9fa;
-  border: 1px solid #dee2e6;
+  background: var(--stryker-white);
+  border: 1px solid var(--stryker-gray);
   border-radius: 4px;
-  color: #495057;
+  color: var(--stryker-black);
   font-size: 14px;
   cursor: pointer;
   transition: all 0.2s;
+  font-weight: 500;
 }
 
 .btn-logout:hover {
-  background: #e9ecef;
+  background: #f5f5f5;
+  border-color: var(--stryker-gold);
 }
 
 .dashboard-main {
@@ -87,18 +90,20 @@
 
 .btn-primary {
   padding: 12px 24px;
-  background: #667eea;
-  color: white;
+  background: var(--stryker-gold);
+  color: var(--stryker-black);
   border: none;
-  border-radius: 6px;
+  border-radius: 4px;
   font-size: 15px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: all 0.3s;
 }
 
 .btn-primary:hover {
-  background: #5568d3;
+  background: #E5A300;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 181, 0, 0.3);
 }
 
 .btn-large {
@@ -114,22 +119,23 @@
 }
 
 .stat-card {
-  background: white;
+  background: var(--stryker-white);
   padding: 24px;
-  border-radius: 8px;
+  border-radius: 4px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #f0f0f0;
 }
 
 .stat-value {
   font-size: 36px;
   font-weight: 700;
-  color: #667eea;
+  color: var(--stryker-gold);
   margin-bottom: 8px;
 }
 
 .stat-label {
   font-size: 14px;
-  color: #666;
+  color: var(--stryker-dark-gray);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -157,16 +163,18 @@
 }
 
 .requests-section {
-  background: white;
-  border-radius: 8px;
+  background: var(--stryker-white);
+  border-radius: 4px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   padding: 24px;
+  border: 1px solid #f0f0f0;
 }
 
 .requests-section h2 {
   margin: 0 0 20px;
   font-size: 20px;
-  color: #1a1a1a;
+  color: var(--stryker-black);
+  font-weight: 600;
 }
 
 .table-container {
@@ -203,7 +211,7 @@
 
 .request-code {
   font-weight: 600;
-  color: #667eea;
+  color: var(--stryker-gold);
 }
 
 .issue-cell {
@@ -250,17 +258,18 @@
 
 .btn-view {
   padding: 6px 16px;
-  background: #667eea;
-  color: white;
+  background: var(--stryker-gold);
+  color: var(--stryker-black);
   border: none;
   border-radius: 4px;
   font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s;
 }
 
 .btn-view:hover {
-  background: #5568d3;
+  background: #E5A300;
 }
 
 .empty-state {
@@ -276,18 +285,19 @@
 
 .btn-secondary {
   padding: 10px 20px;
-  background: white;
-  border: 1px solid #667eea;
-  color: #667eea;
+  background: var(--stryker-white);
+  border: 2px solid var(--stryker-gold);
+  color: var(--stryker-black);
   border-radius: 4px;
   font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .btn-secondary:hover {
-  background: #667eea;
-  color: white;
+  background: var(--stryker-gold);
+  color: var(--stryker-black);
 }
 
 .loading-container {
@@ -302,7 +312,7 @@
   width: 50px;
   height: 50px;
   border: 4px solid #f3f3f3;
-  border-top: 4px solid #667eea;
+  border-top: 4px solid var(--stryker-gold);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }

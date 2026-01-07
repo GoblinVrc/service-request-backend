@@ -1,26 +1,28 @@
+/* Stryker Brand - Login Page */
 .login-container {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--stryker-white);
   padding: 20px;
 }
 
 .login-card {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  background: var(--stryker-white);
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   max-width: 500px;
   width: 100%;
   overflow: hidden;
+  border: 1px solid var(--stryker-gray);
 }
 
 .login-header {
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: var(--stryker-gradient-gold);
   padding: 40px 30px;
   text-align: center;
-  border-bottom: 3px solid #667eea;
+  border-bottom: 0;
 }
 
 .company-logo {
@@ -32,13 +34,13 @@
 .login-header h1 {
   margin: 0;
   font-size: 28px;
-  color: #333;
+  color: var(--stryker-black);
   font-weight: 600;
 }
 
 .subtitle {
   margin: 10px 0 0;
-  color: #666;
+  color: var(--stryker-dark-gray);
   font-size: 14px;
 }
 
@@ -49,34 +51,36 @@
 .login-content h2 {
   margin: 0 0 10px;
   font-size: 24px;
-  color: #333;
+  color: var(--stryker-black);
 }
 
 .login-content > p {
   margin: 0 0 30px;
-  color: #666;
+  color: var(--stryker-dark-gray);
   font-size: 14px;
 }
 
 .login-button {
   width: 100%;
   padding: 14px 24px;
-  background: #2f2f2f;
-  color: white;
+  background: var(--stryker-gold);
+  color: var(--stryker-black);
   border: none;
   border-radius: 4px;
   font-size: 16px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 12px;
-  transition: background 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 .login-button:hover {
-  background: #1a1a1a;
+  background: #E5A300;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 181, 0, 0.3);
 }
 
 .microsoft-icon {
@@ -92,7 +96,7 @@
 
 .info-text {
   margin: 12px 0;
-  color: #666;
+  color: var(--stryker-dark-gray);
   font-size: 13px;
   display: flex;
   align-items: center;
@@ -103,28 +107,29 @@
   background: #f8f9fa;
   padding: 20px 30px;
   text-align: center;
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid var(--stryker-gray);
 }
 
 .login-footer p {
   margin: 8px 0;
   font-size: 13px;
-  color: #666;
+  color: var(--stryker-dark-gray);
 }
 
 .login-footer a {
-  color: #667eea;
+  color: var(--stryker-gold);
   text-decoration: none;
   font-weight: 500;
 }
 
 .login-footer a:hover {
   text-decoration: underline;
+  color: #E5A300;
 }
 
 .copyright {
   font-size: 11px !important;
-  color: #999 !important;
+  color: var(--stryker-gray) !important;
 }
 
 @media (max-width: 600px) {
