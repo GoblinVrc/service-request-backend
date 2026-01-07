@@ -29,15 +29,24 @@ This application now uses **Supabase (PostgreSQL)** instead of Azure SQL Databas
 
 ## Step 2: Get Database Connection String
 
+**IMPORTANT**: Use the **Connection Pooler** (IPv4) for Render compatibility!
+
 1. In your Supabase project, click **Project Settings** (gear icon in left sidebar)
 2. Click **Database** in the left menu
 3. Scroll to **Connection String** section
-4. Select **URI** tab
-5. Copy the connection string (looks like):
+4. **Select "Session" mode** (not Transaction mode)
+5. **Enable "Use connection pooling"** checkbox
+6. Select **URI** tab
+7. Copy the connection pooler string (should look like):
    ```
-   postgresql://postgres:[YOUR-PASSWORD]@db.xxxxxxxxxxxxx.supabase.co:5432/postgres
+   postgresql://postgres.xxxxxxxxxxxxx:[YOUR-PASSWORD]@aws-0-us-east-1.pooler.supabase.com:6543/postgres
    ```
-6. **IMPORTANT**: Replace `[YOUR-PASSWORD]` with your actual database password from Step 1
+
+   **Note the differences**:
+   - Port is `6543` (pooler) NOT `5432` (direct)
+   - Host ends with `.pooler.supabase.com` (supports IPv4)
+
+8. **IMPORTANT**: Replace `[YOUR-PASSWORD]` with your actual database password from Step 1
 
 ---
 
@@ -132,8 +141,10 @@ The PostgreSQL schema includes:
 
 ## Troubleshooting
 
-### Issue: "could not connect to server"
-- **Solution**: Check that your connection string password is correct
+### Issue: "could not connect to server" or "Network is unreachable"
+- **Solution**: Make sure you're using the **Connection Pooler** URL (port 6543), NOT the direct connection (port 5432)
+- The pooler URL ends with `.pooler.supabase.com` and uses IPv4 (Render compatible)
+- Check that your connection string password is correct
 - Verify the password matches what you set in Step 1
 
 ### Issue: "relation does not exist"

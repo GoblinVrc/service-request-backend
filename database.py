@@ -7,15 +7,32 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-def get_connection_string() -> str:
+def get_connection_string() -> dict:
     """
-    Get PostgreSQL connection string for Supabase.
-    Supports both Supabase and generic PostgreSQL connections.
+    Get PostgreSQL connection parameters for Supabase.
+    Returns a dictionary of connection parameters.
     """
     # Supabase connection (preferred)
     supabase_url = os.getenv('SUPABASE_DB_URL')
     if supabase_url:
-        return supabase_url
+        # Parse the connection URL
+        # Format: postgresql://user:password@host:port/database
+        import re
+        match = re.match(r'postgresql://([^:]+):([^@]+)@([^:]+):(\d+)/(.+)', supabase_url)
+        if match:
+            user, password, host, port, database = match.groups()
+            # Force IPv4 to avoid IPv6 network unreachable errors on Render
+            return {
+                'host': host,
+                'port': port,
+                'dbname': database,
+                'user': user,
+                'password': password,
+                'sslmode': 'require',
+                'connect_timeout': 10
+            }
+        else:
+            raise ValueError("Invalid SUPABASE_DB_URL format. Expected: postgresql://user:password@host:port/database")
 
     # Generic PostgreSQL connection
     host = os.getenv('POSTGRES_HOST')
@@ -27,7 +44,15 @@ def get_connection_string() -> str:
     if not all([host, database, user, password]):
         raise ValueError("Missing PostgreSQL connection parameters. Set either SUPABASE_DB_URL or (POSTGRES_HOST, POSTGRES_DATABASE, POSTGRES_USER, POSTGRES_PASSWORD)")
 
-    return f"host={host} port={port} dbname={database} user={user} password={password} sslmode=require"
+    return {
+        'host': host,
+        'port': port,
+        'dbname': database,
+        'user': user,
+        'password': password,
+        'sslmode': 'require',
+        'connect_timeout': 10
+    }
 
 @contextmanager
 def get_db_connection():
@@ -37,10 +62,10 @@ def get_db_connection():
     """
     conn = None
     try:
-        conn_str = get_connection_string()
-        print(f"Attempting PostgreSQL connection to database...")
+        conn_params = get_connection_string()
+        print(f"Attempting PostgreSQL connection to {conn_params['host']}...")
 
-        conn = psycopg2.connect(conn_str)
+        conn = psycopg2.connect(**conn_params)
         print("Database connection successful!")
 
         yield conn
