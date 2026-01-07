@@ -1,10 +1,56 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import './Login.css';
+
+// Add missing CSS class
+const styles = `
+  .demo-note {
+    font-size: 12px;
+    color: #999;
+    margin-top: 5px;
+  }
+  .form-group {
+    margin-bottom: 20px;
+    text-align: left;
+  }
+  .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #333;
+    font-size: 14px;
+  }
+  .form-control {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    font-size: 14px;
+    box-sizing: border-box;
+  }
+  .form-control:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  }
+  .error-message {
+    background: #ffebee;
+    color: #c62828;
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 16px;
+    font-size: 14px;
+  }
+`;
+
+// Inject styles
+if (typeof document !== 'undefined') {
+  const styleSheet = document.createElement("style");
+  styleSheet.textContent = styles;
+  document.head.appendChild(styleSheet);
+}
 
 // Simplified login without OAuth - for demo/PoC
 const LoginSimple: React.FC = () => {
-  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -12,6 +58,8 @@ const LoginSimple: React.FC = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    console.log('Login attempt with email:', email);
 
     if (!email) {
       setError('Please enter your email');
@@ -32,12 +80,17 @@ const LoginSimple: React.FC = () => {
         territories: ['CA-WEST']
       };
 
+      console.log('Setting user in localStorage:', mockUser);
       localStorage.setItem('user', JSON.stringify(mockUser));
       localStorage.setItem('isAuthenticated', 'true');
 
-      // Redirect to dashboard
-      navigate('/dashboard');
+      console.log('Navigating to dashboard...');
+      // Small delay to ensure localStorage is set
+      setTimeout(() => {
+        window.location.href = '/dashboard';
+      }, 100);
     } catch (err) {
+      console.error('Login error:', err);
       setError('Login failed. Please try again.');
     } finally {
       setLoading(false);
