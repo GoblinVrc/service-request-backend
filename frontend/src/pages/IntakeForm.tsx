@@ -263,8 +263,8 @@ const IntakeForm: React.FC = () => {
                 >
                   <option value="">-- Select Country --</option>
                   {countries.map((country) => (
-                    <option key={country.CountryCode} value={country.CountryCode}>
-                      {country.CountryName}
+                    <option key={country.country_code} value={country.country_code}>
+                      {country.country_name}
                     </option>
                   ))}
                 </select>
@@ -282,8 +282,8 @@ const IntakeForm: React.FC = () => {
                 >
                   <option value="">-- Select Language --</option>
                   {languages.map((lang) => (
-                    <option key={lang.LanguageCode} value={lang.LanguageCode}>
-                      {lang.LanguageName}
+                    <option key={lang.language_code} value={lang.language_code}>
+                      {lang.language_name}
                     </option>
                   ))}
                 </select>

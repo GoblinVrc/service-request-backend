@@ -9,15 +9,15 @@ export interface User {
 }
 
 export interface Country {
-  CountryCode: string;
-  CountryName: string;
-  DefaultLanguage: string;
-  SupportedLanguages: string[];
+  country_code: string;
+  country_name: string;
+  default_language: string;
+  supported_languages: string;
 }
 
 export interface Language {
-  LanguageCode: string;
-  LanguageName: string;
+  language_code: string;
+  language_name: string;
 }
 
 export interface LegalDocument {
