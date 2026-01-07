@@ -25,6 +25,16 @@ class TokenData(BaseModel):
     name: Optional[str] = None
 
 def verify_entra_token(authorization: Optional[str] = Header(None)) -> TokenData:
+    # Demo mode for PoC - bypass OAuth validation completely
+    if DEMO_MODE:
+        return TokenData(
+            email="demo@stryker.com",
+            role=Roles.ADMIN,
+            name="Demo User",
+            customer_number=None,
+            territories=None
+        )
+
     if not authorization:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -44,8 +54,8 @@ def verify_entra_token(authorization: Optional[str] = Header(None)) -> TokenData
             detail="Invalid authorization header format"
         )
 
-    # Demo mode for PoC - bypass OAuth validation
-    if DEMO_MODE and token.startswith("demo-token-"):
+    # Old demo token logic (kept for backwards compatibility)
+    if token.startswith("demo-token-"):
         try:
             import base64
             import json
