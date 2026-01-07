@@ -11,8 +11,9 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# CORS
-allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000").split(",")
+# CORS - Allow all origins for PoC/Demo (configure ALLOWED_ORIGINS in production)
+allowed_origins_str = os.getenv("ALLOWED_ORIGINS", "*")
+allowed_origins = allowed_origins_str.split(",") if allowed_origins_str != "*" else ["*"]
 
 app.add_middleware(
     CORSMiddleware,
