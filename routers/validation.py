@@ -40,7 +40,7 @@ def validate_item(
                 repairability_status,
                 install_base_status,
                 eligibility_countries
-            FROM regops_app.tbl_globi_eu_am_99_Items
+            FROM regops_app.tbl_globi_eu_am_99_items
             WHERE serial_number = %s
         """
         results = execute_query(query, (request.serial_number,))
@@ -64,7 +64,7 @@ def validate_item(
                 repairability_status,
                 install_base_status,
                 eligibility_countries
-            FROM regops_app.tbl_globi_eu_am_99_Items
+            FROM regops_app.tbl_globi_eu_am_99_items
             WHERE item_number = %s
         """
         results = execute_query(query, (request.item_number,))
@@ -133,8 +133,8 @@ def validate_customer(
             c.ship_to_address,
             c.phone_number as CustomerPhone,
             c.has_pro_care_contract
-        FROM regops_app.tbl_globi_eu_am_99_CustomerUsers cu
-        INNER JOIN regops_app.tbl_globi_eu_am_99_Customers c ON cu.customer_number = c.customer_number
+        FROM regops_app.tbl_globi_eu_am_99_customer_users cu
+        INNER JOIN regops_app.tbl_globi_eu_am_99_customers c ON cu.customer_number = c.customer_number
         WHERE cu.email = %s
         AND cu.is_active = true
         AND c.is_active = true

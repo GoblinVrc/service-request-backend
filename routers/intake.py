@@ -102,9 +102,9 @@ def submit_service_request(
             # Auto-assign based on item data
             item_query = """
                 SELECT repairability_status
-                FROM regops_app.tbl_globi_eu_am_99_Items
+                FROM regops_app.tbl_globi_eu_am_99_items
                 WHERE (serial_number = %s OR item_number = %s)
-                AND is_serviceable = 1
+                AND is_serviceable = true
             """
             item_result = execute_query(
                 item_query,
@@ -117,27 +117,28 @@ def submit_service_request(
         territory = None
         if request.customer_number:
             territory_query = """
-                SELECT TOP 1 Territory
-                FROM regops_app.tbl_globi_eu_am_99_CustomerTerritories
+                SELECT territory
+                FROM regops_app.tbl_globi_eu_am_99_customer_territories
                 WHERE customer_number = %s
+                LIMIT 1
             """
             territory_result = execute_query(territory_query, (request.customer_number,))
             if territory_result:
-                territory = territory_result[0]['Territory']
+                territory = territory_result[0]['territory']
 
         # Insert service request
         insert_query = """
-            INSERT INTO regops_app.tbl_globi_eu_am_99_ServiceRequests (
-                RequestCode,
-                RequestType,
+            INSERT INTO regops_app.tbl_globi_eu_am_99_service_requests (
+                request_code,
+                request_type,
                 customer_number,
                 customer_name,
-                Contactemail,
-                ContactPhone,
-                ContactName,
+                contact_email,
+                contact_phone,
+                contact_name,
                 country_code,
-                Territory,
-                SiteAddress,
+                territory,
+                site_address,
                 serial_number,
                 item_number,
                 lot_number,
@@ -145,24 +146,24 @@ def submit_service_request(
                 product_family,
                 main_reason,
                 sub_reason,
-                IssueDescription,
+                issue_description,
                 repairability_status,
-                RequestedServiceDate,
-                UrgencyLevel,
-                LoanerRequired,
-                LoanerDetails,
-                QuoteRequired,
-                Status,
-                SubmittedByemail,
-                SubmittedByName,
+                requested_service_date,
+                urgency_level,
+                loaner_required,
+                loaner_details,
+                quote_required,
+                status,
+                submitted_by_email,
+                submitted_by_name,
                 language_code,
-                CustomerNotes
+                customer_notes
             ) VALUES (
-                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-                ?, ?, ?, ?, 'Submitted', ?, ?, ?, ?
-            );
-            SELECT SCOPE_IDENTITY() AS Id;
+                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                %s, %s, %s, %s, 'Submitted', %s, %s, %s, %s
+            )
+            RETURNING id;
         """
 
         cursor.execute(insert_query, (
@@ -200,8 +201,8 @@ def submit_service_request(
 
         # Log activity
         cursor.execute("""
-            INSERT INTO regops_app.tbl_globi_eu_am_99_ActivityLog (RequestId, ActivityType, ActivityDescription, PerformedBy)
-            VALUES (?, 'Created', 'Service request created', ?)
+            INSERT INTO regops_app.tbl_globi_eu_am_99_activity_log (request_id, activity_type, activity_description, performed_by)
+            VALUES (%s, 'Created', 'Service request created', %s)
         """, (request_id, token_data.email))
 
         conn.commit()
@@ -226,7 +227,7 @@ def get_issue_reasons(
     """
     query = """
         SELECT main_reason, sub_reason, display_order
-        FROM regops_app.tbl_globi_eu_am_99_IssueReasons
+        FROM regops_app.tbl_globi_eu_am_99_issue_reasons
         WHERE language_code = %s
         AND is_active = true
         ORDER BY display_order, main_reason, sub_reason
