@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from typing import Optional, List
-from pydantic import BaseModel, emailStr, validator
+from pydantic import BaseModel, EmailStr, validator
 from datetime import datetime
 from auth import verify_entra_token, TokenData
 from database import execute_query, get_db_connection
@@ -17,7 +17,7 @@ class ServiceRequestCreate(BaseModel):
 
     # Mandatory fields (UR-037)
     country_code: str
-    contact_email: emailStr
+    contact_email: EmailStr
     contact_name: str
     contact_phone: str
     main_reason: str
