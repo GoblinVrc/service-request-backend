@@ -30,18 +30,18 @@ def validate_item(
     if request.serial_number:
         query = """
             SELECT
-                item_number,
-                item_description,
-                serial_number,
-                lot_number,
-                product_family,
-                product_line,
-                is_serviceable,
-                repairability_status,
-                install_base_status,
-                eligibility_countries
-            FROM regops_app.tbl_globi_eu_am_99_Items
-            WHERE serial_number = %s
+                ItemNumber,
+                ItemDescription,
+                SerialNumber,
+                LotNumber,
+                ProductFamily,
+                ProductLine,
+                IsServiceable,
+                RepairabilityStatus,
+                InstallBaseStatus,
+                EligibilityCountries
+            FROM REGOPS_APP.tbl_globi_eu_am_99_Items
+            WHERE SerialNumber = ?
         """
         results = execute_query(query, (request.serial_number,))
 
@@ -54,18 +54,18 @@ def validate_item(
     elif request.item_number:
         query = """
             SELECT
-                item_number,
-                item_description,
-                serial_number,
-                lot_number,
-                product_family,
-                product_line,
-                is_serviceable,
-                repairability_status,
-                install_base_status,
-                eligibility_countries
-            FROM regops_app.tbl_globi_eu_am_99_Items
-            WHERE item_number = %s
+                ItemNumber,
+                ItemDescription,
+                SerialNumber,
+                LotNumber,
+                ProductFamily,
+                ProductLine,
+                IsServiceable,
+                RepairabilityStatus,
+                InstallBaseStatus,
+                EligibilityCountries
+            FROM REGOPS_APP.tbl_globi_eu_am_99_Items
+            WHERE ItemNumber = ?
         """
         results = execute_query(query, (request.item_number,))
 
@@ -75,7 +75,7 @@ def validate_item(
         item = results[0]
 
     # Validate serviceability (UR-028)
-    if not item['is_serviceable']:
+    if not item['IsServiceable']:
         raise HTTPException(403, {
             "error": "Item is not serviceable",
             "item": item
@@ -83,7 +83,7 @@ def validate_item(
 
     # Validate country eligibility (UR-033)
     import json
-    eligible_countries = json.loads(item['eligibility_countries'] or '[]')
+    eligible_countries = json.loads(item['EligibilityCountries'] or '[]')
 
     if request.country_code not in eligible_countries:
         raise HTTPException(403, {
@@ -94,9 +94,9 @@ def validate_item(
 
     # Validate install base status (UR-033)
     excluded_statuses = ['DECOMMISSIONED', 'SCRAPPED', 'SOLD']  # TBD by business
-    if item['install_base_status'] in excluded_statuses:
+    if item['InstallBaseStatus'] in excluded_statuses:
         raise HTTPException(403, {
-            "error": f"Item with status '{item['install_base_status']}' is not eligible for service",
+            "error": f"Item with status '{item['InstallBaseStatus']}' is not eligible for service",
             "item": item
         })
 
@@ -122,22 +122,22 @@ def validate_customer(
     # Check if customer exists
     query = """
         SELECT
-            cu.email,
-            cu.customer_number,
-            cu.first_name,
-            cu.last_name,
-            cu.phone_number,
-            c.customer_name,
-            c.country_code,
-            c.bill_to_address,
-            c.ship_to_address,
-            c.phone_number as CustomerPhone,
-            c.has_pro_care_contract
-        FROM regops_app.tbl_globi_eu_am_99_CustomerUsers cu
-        INNER JOIN regops_app.tbl_globi_eu_am_99_Customers c ON cu.customer_number = c.customer_number
-        WHERE cu.email = %s
-        AND cu.is_active = true
-        AND c.is_active = true
+            cu.Email,
+            cu.CustomerNumber,
+            cu.FirstName,
+            cu.LastName,
+            cu.PhoneNumber,
+            c.CustomerName,
+            c.CountryCode,
+            c.BillToAddress,
+            c.ShipToAddress,
+            c.PhoneNumber as CustomerPhone,
+            c.HasProCareContract
+        FROM REGOPS_APP.tbl_globi_eu_am_99_CustomerUsers cu
+        INNER JOIN REGOPS_APP.tbl_globi_eu_am_99_Customers c ON cu.CustomerNumber = c.CustomerNumber
+        WHERE cu.Email = ?
+        AND cu.IsActive = 1
+        AND c.IsActive = 1
     """
 
     results = execute_query(query, (email,))
@@ -152,9 +152,9 @@ def validate_customer(
     customer = results[0]
 
     # Validate country match
-    if customer['country_code'] != country_code:
+    if customer['CountryCode'] != country_code:
         raise HTTPException(403, {
-            "error": f"Customer is registered in {customer['country_code']}, not {country_code}"
+            "error": f"Customer is registered in {customer['CountryCode']}, not {country_code}"
         })
 
     return {

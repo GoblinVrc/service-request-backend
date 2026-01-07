@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from typing import Optional, List
-from pydantic import BaseModel, emailStr, validator
+from pydantic import BaseModel, EmailStr, validator
 from datetime import datetime
 from auth import verify_entra_token, TokenData
 from database import execute_query, get_db_connection
@@ -17,7 +17,7 @@ class ServiceRequestCreate(BaseModel):
 
     # Mandatory fields (UR-037)
     country_code: str
-    contact_email: emailStr
+    contact_email: EmailStr
     contact_name: str
     contact_phone: str
     main_reason: str
@@ -92,7 +92,7 @@ def submit_service_request(
 
         # Call stored procedure to generate request code
         request_code_param = cursor.execute(
-            "DECLARE @code NVARCHAR(50); EXEC regops_app.sp_GenerateRequestCode ?, @code OUTPUT; SELECT @code",
+            "DECLARE @code NVARCHAR(50); EXEC REGOPS_APP.sp_GenerateRequestCode ?, @code OUTPUT; SELECT @code",
             (request.country_code,)
         ).fetchone()[0]
 
@@ -101,25 +101,25 @@ def submit_service_request(
         if request.serial_number or request.item_number:
             # Auto-assign based on item data
             item_query = """
-                SELECT repairability_status
-                FROM regops_app.tbl_globi_eu_am_99_Items
-                WHERE (serial_number = %s OR item_number = %s)
-                AND is_serviceable = 1
+                SELECT RepairabilityStatus
+                FROM REGOPS_APP.tbl_globi_eu_am_99_Items
+                WHERE (SerialNumber = ? OR ItemNumber = ?)
+                AND IsServiceable = 1
             """
             item_result = execute_query(
                 item_query,
                 (request.serial_number or '', request.item_number or '')
             )
             if item_result:
-                repairability_status = item_result[0]['repairability_status']
+                repairability_status = item_result[0]['RepairabilityStatus']
 
         # Determine territory for routing (UR-046)
         territory = None
         if request.customer_number:
             territory_query = """
                 SELECT TOP 1 Territory
-                FROM regops_app.tbl_globi_eu_am_99_CustomerTerritories
-                WHERE customer_number = %s
+                FROM REGOPS_APP.tbl_globi_eu_am_99_CustomerTerritories
+                WHERE CustomerNumber = ?
             """
             territory_result = execute_query(territory_query, (request.customer_number,))
             if territory_result:
@@ -127,35 +127,35 @@ def submit_service_request(
 
         # Insert service request
         insert_query = """
-            INSERT INTO regops_app.tbl_globi_eu_am_99_ServiceRequests (
+            INSERT INTO REGOPS_APP.tbl_globi_eu_am_99_ServiceRequests (
                 RequestCode,
                 RequestType,
-                customer_number,
-                customer_name,
-                Contactemail,
+                CustomerNumber,
+                CustomerName,
+                ContactEmail,
                 ContactPhone,
                 ContactName,
-                country_code,
+                CountryCode,
                 Territory,
                 SiteAddress,
-                serial_number,
-                item_number,
-                lot_number,
-                item_description,
-                product_family,
-                main_reason,
-                sub_reason,
+                SerialNumber,
+                ItemNumber,
+                LotNumber,
+                ItemDescription,
+                ProductFamily,
+                MainReason,
+                SubReason,
                 IssueDescription,
-                repairability_status,
+                RepairabilityStatus,
                 RequestedServiceDate,
                 UrgencyLevel,
                 LoanerRequired,
                 LoanerDetails,
                 QuoteRequired,
                 Status,
-                SubmittedByemail,
+                SubmittedByEmail,
                 SubmittedByName,
-                language_code,
+                LanguageCode,
                 CustomerNotes
             ) VALUES (
                 ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
@@ -200,7 +200,7 @@ def submit_service_request(
 
         # Log activity
         cursor.execute("""
-            INSERT INTO regops_app.tbl_globi_eu_am_99_ActivityLog (RequestId, ActivityType, ActivityDescription, PerformedBy)
+            INSERT INTO REGOPS_APP.tbl_globi_eu_am_99_ActivityLog (RequestId, ActivityType, ActivityDescription, PerformedBy)
             VALUES (?, 'Created', 'Service request created', ?)
         """, (request_id, token_data.email))
 
@@ -225,23 +225,23 @@ def get_issue_reasons(
     UR-040: Repair Error/Issue Description Dropdown List
     """
     query = """
-        SELECT main_reason, sub_reason, display_order
-        FROM regops_app.tbl_globi_eu_am_99_IssueReasons
-        WHERE language_code = %s
-        AND is_active = true
-        ORDER BY display_order, main_reason, sub_reason
+        SELECT MainReason, SubReason, DisplayOrder
+        FROM REGOPS_APP.tbl_globi_eu_am_99_IssueReasons
+        WHERE LanguageCode = ?
+        AND IsActive = 1
+        ORDER BY DisplayOrder, MainReason, SubReason
     """
 
     results = execute_query(query, (language_code,))
 
-    # Group by main_reason
+    # Group by MainReason
     grouped = {}
     for row in results:
-        main = row['main_reason']
+        main = row['MainReason']
         if main not in grouped:
             grouped[main] = []
-        if row['sub_reason']:
-            grouped[main].append(row['sub_reason'])
+        if row['SubReason']:
+            grouped[main].append(row['SubReason'])
 
     return grouped
 
@@ -253,8 +253,8 @@ def get_repairability_statuses(token_data: TokenData = Depends(verify_entra_toke
     """
     query = """
         SELECT StatusCode, StatusName, Description, RepairLocation
-        FROM regops_app.tbl_globi_eu_am_99_repairability_statuses
-        WHERE is_active = true
+        FROM REGOPS_APP.tbl_globi_eu_am_99_RepairabilityStatuses
+        WHERE IsActive = 1
         ORDER BY StatusName
     """
     return execute_query(query)
