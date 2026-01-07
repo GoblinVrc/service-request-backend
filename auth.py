@@ -10,6 +10,7 @@ load_dotenv()
 TENANT_ID = os.getenv("ENTRA_TENANT_ID")
 CLIENT_ID = os.getenv("ENTRA_CLIENT_ID")
 CLIENT_SECRET = os.getenv("ENTRA_CLIENT_SECRET")
+DEMO_MODE = os.getenv("DEMO_MODE", "false").lower() == "true"  # Enable demo auth for PoC
 
 class Roles:
     CUSTOMER = "Customer"
@@ -29,7 +30,7 @@ def verify_entra_token(authorization: Optional[str] = Header(None)) -> TokenData
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Missing authorization header"
         )
-    
+
     try:
         scheme, token = authorization.split()
         if scheme.lower() != "bearer":
@@ -42,7 +43,35 @@ def verify_entra_token(authorization: Optional[str] = Header(None)) -> TokenData
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid authorization header format"
         )
-    
+
+    # Demo mode for PoC - bypass OAuth validation
+    if DEMO_MODE and token.startswith("demo-token-"):
+        try:
+            import base64
+            import json
+            # Decode demo token to get user data
+            user_json = base64.b64decode(token.replace("demo-token-", "")).decode('utf-8')
+            user_data = json.loads(user_json)
+
+            email = user_data.get("email", "demo@example.com")
+            name = user_data.get("name", "Demo User")
+            role = user_data.get("role", Roles.CUSTOMER)
+            customer_number = user_data.get("customer_number")
+            territories = user_data.get("territories", [])
+
+            return TokenData(
+                email=email,
+                role=role,
+                customer_number=customer_number,
+                territories=territories,
+                name=name
+            )
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail=f"Invalid demo token: {str(e)}"
+            )
+
     try:
         graph_url = "https://graph.microsoft.com/v1.0/me"
         headers = {"Authorization": f"Bearer {token}"}
