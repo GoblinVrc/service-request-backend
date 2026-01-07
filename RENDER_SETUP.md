@@ -6,6 +6,8 @@ The application requires Azure SQL Database connection. You must configure the f
 
 ### Required Environment Variables
 
+This application uses **Service Principal (SPN) authentication** for Azure SQL Database.
+
 Go to your Render service → **Environment** tab and add these variables:
 
 1. **AZURE_SQL_SERVER**
@@ -16,13 +18,20 @@ Go to your Render service → **Environment** tab and add these variables:
    - Value: Your database name (e.g., `service_request_db`)
    - Type: Secret
 
-3. **AZURE_SQL_USER**
-   - Value: Your SQL username
+3. **AZURE_CLIENT_ID**
+   - Value: Your Service Principal Application (client) ID
    - Type: Secret
+   - Found in: Azure Portal → App Registrations → Your App → Overview
 
-4. **AZURE_SQL_PASSWORD**
-   - Value: Your SQL password
+4. **AZURE_CLIENT_SECRET**
+   - Value: Your Service Principal client secret value
    - Type: Secret
+   - Found in: Azure Portal → App Registrations → Your App → Certificates & secrets
+
+5. **AZURE_TENANT_ID**
+   - Value: Your Azure AD tenant ID
+   - Type: Secret
+   - Found in: Azure Portal → Azure Active Directory → Overview
 
 ### How to Add Environment Variables in Render
 
@@ -32,9 +41,9 @@ Go to your Render service → **Environment** tab and add these variables:
 4. Click **Add Environment Variable**
 5. For each variable:
    - Enter the **Key** (e.g., `AZURE_SQL_SERVER`)
-   - Enter the **Value** (your actual database credentials)
+   - Enter the **Value** (your actual credentials)
    - Click **Save Changes**
-6. After adding all 4 variables, click **Manual Deploy** → **Deploy latest commit**
+6. After adding all 5 variables (AZURE_SQL_SERVER, AZURE_SQL_DATABASE, AZURE_CLIENT_ID, AZURE_CLIENT_SECRET, AZURE_TENANT_ID), click **Manual Deploy** → **Deploy latest commit**
 
 ### Verify Connection
 

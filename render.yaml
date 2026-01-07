@@ -9,13 +9,16 @@ services:
         value: "true"
       - key: PYTHON_VERSION
         value: "3.11"
-      # Azure SQL Database configuration
+      # Azure SQL Database configuration with Service Principal (SPN)
       # These values should be set in Render Dashboard as secrets
       - key: AZURE_SQL_SERVER
         sync: false  # Set in Render Dashboard
       - key: AZURE_SQL_DATABASE
         sync: false  # Set in Render Dashboard
-      - key: AZURE_SQL_USER
-        sync: false  # Set in Render Dashboard
-      - key: AZURE_SQL_PASSWORD
-        sync: false  # Set in Render Dashboard
+      # Service Principal authentication (preferred for Azure SQL)
+      - key: AZURE_CLIENT_ID
+        sync: false  # Service Principal Application (client) ID
+      - key: AZURE_CLIENT_SECRET
+        sync: false  # Service Principal client secret
+      - key: AZURE_TENANT_ID
+        sync: false  # Azure AD tenant ID
