@@ -90,11 +90,12 @@ def submit_service_request(
     with get_db_connection() as conn:
         cursor = conn.cursor()
 
-        # Call stored procedure to generate request code
-        request_code_param = cursor.execute(
-            "DECLARE @code NVARCHAR(50); EXEC regops_app.sp_GenerateRequestCode ?, @code OUTPUT; SELECT @code",
+        # Call PostgreSQL function to generate request code
+        cursor.execute(
+            "SELECT regops_app.generate_request_code(%s)",
             (request.country_code,)
-        ).fetchone()[0]
+        )
+        request_code_param = cursor.fetchone()[0]
 
         # Determine repairability status (UR-041)
         repairability_status = None
@@ -253,9 +254,9 @@ def get_repairability_statuses(token_data: TokenData = Depends(verify_entra_toke
     UR-041: Repairability status types
     """
     query = """
-        SELECT StatusCode, StatusName, Description, RepairLocation
+        SELECT status_code, status_name, description, repair_location
         FROM regops_app.tbl_globi_eu_am_99_repairability_statuses
         WHERE is_active = true
-        ORDER BY StatusName
+        ORDER BY status_name
     """
     return execute_query(query)

@@ -29,51 +29,51 @@ def get_requests(
 ):
     query = """
         SELECT
-            sr.Id, sr.RequestType, sr.CustomerNumber, sr.Territory,
-            sr.SerialNumber, sr.LotNumber, sr.ItemNumber,
-            sr.MainReason, sr.SubReason, sr.Details, sr.Status,
-            sr.SubmittedDate, sr.SubmittedByEmail, sr.ContactEmail, sr.ContactPhone
-        FROM REGOPS_APP.tbl_globi_eu_am_99_ServiceRequests sr
+            sr.id, sr.request_type, sr.customer_number, sr.territory,
+            sr.serial_number, sr.lot_number, sr.item_number,
+            sr.main_reason, sr.sub_reason, sr.issue_description, sr.status,
+            sr.submitted_date, sr.submitted_by_email, sr.contact_email, sr.contact_phone
+        FROM regops_app.tbl_globi_eu_am_99_service_requests sr
         WHERE 1=1
     """
     params = []
-    
+
     # RBAC filtering
     if token_data.role == Roles.CUSTOMER:
-        query += " AND sr.CustomerNumber = ?"
+        query += " AND sr.customer_number = %s"
         params.append(token_data.customer_number)
-    
+
     elif token_data.role == Roles.SALES_TECH:
         if token_data.territories:
-            placeholders = ','.join('?' * len(token_data.territories))
-            query += f" AND sr.Territory IN ({placeholders})"
+            placeholders = ','.join(['%s'] * len(token_data.territories))
+            query += f" AND sr.territory IN ({placeholders})"
             params.extend(token_data.territories)
         else:
             return []
-    
+
     # Filters
     if status:
-        query += " AND sr.Status = ?"
+        query += " AND sr.status = %s"
         params.append(status)
-    
+
     if from_date:
-        query += " AND sr.SubmittedDate >= ?"
+        query += " AND sr.submitted_date >= %s"
         params.append(from_date)
-    
+
     if to_date:
-        query += " AND sr.SubmittedDate <= ?"
+        query += " AND sr.submitted_date <= %s"
         params.append(to_date)
-    
+
     if item_number:
-        query += " AND sr.ItemNumber LIKE ?"
+        query += " AND sr.item_number LIKE %s"
         params.append(f"%{item_number}%")
-    
+
     if serial_number:
-        query += " AND sr.SerialNumber LIKE ?"
+        query += " AND sr.serial_number LIKE %s"
         params.append(f"%{serial_number}%")
-    
-    query += " ORDER BY sr.SubmittedDate DESC"
-    
+
+    query += " ORDER BY sr.submitted_date DESC"
+
     results = execute_query(query, tuple(params) if params else None)
     return results
 
@@ -84,31 +84,36 @@ def create_request(
 ):
     if token_data.role != Roles.CUSTOMER:
         raise HTTPException(403, "Only customers can create service requests")
-    
+
     customer_number = token_data.customer_number
     if not customer_number:
         raise HTTPException(400, "Customer number not found")
-    
+
     # Get territory
-    territory_query = "SELECT TOP 1 Territory FROM REGOPS_APP.tbl_globi_eu_am_99_CustomerTerritories WHERE CustomerNumber = ?"
+    territory_query = """
+        SELECT territory
+        FROM regops_app.tbl_globi_eu_am_99_customer_territories
+        WHERE customer_number = %s
+        LIMIT 1
+    """
     territory_result = execute_query(territory_query, (customer_number,))
-    territory = territory_result[0]['Territory'] if territory_result else 'UNKNOWN'
-    
+    territory = territory_result[0]['territory'] if territory_result else 'UNKNOWN'
+
     # Validation
     if not any([request.serial_number, request.lot_number, request.item_number]):
         raise HTTPException(400, "At least one of serial_number, lot_number, or item_number required")
-    
+
     # Insert
     insert_query = """
-        INSERT INTO REGOPS_APP.tbl_globi_eu_am_99_ServiceRequests (
-            RequestType, CustomerNumber, Territory, SerialNumber,
-            LotNumber, ItemNumber, MainReason, SubReason, Details,
-            ContactEmail, ContactPhone, SubmittedByEmail, Status, SubmittedDate
+        INSERT INTO regops_app.tbl_globi_eu_am_99_service_requests (
+            request_type, customer_number, territory, serial_number,
+            lot_number, item_number, main_reason, sub_reason, issue_description,
+            contact_email, contact_phone, submitted_by_email, status, submitted_date
         )
-        OUTPUT INSERTED.Id
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Submitted', GETUTCDATE())
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'Submitted', CURRENT_TIMESTAMP)
+        RETURNING id
     """
-    
+
     with get_db_connection() as conn:
         cursor = conn.cursor()
         cursor.execute(insert_query, (
@@ -125,10 +130,13 @@ def create_request(
             request.contact_phone,
             token_data.email
         ))
-        
-        new_id = cursor.fetchone()[0]
-        conn.commit()
-    
+
+        result = cursor.fetchone()
+        new_id = result[0] if result else None
+
+        if not new_id:
+            raise HTTPException(500, "Failed to create request")
+
     return {"id": new_id, "status": "created"}
 
 @router.get("/{request_id}")
@@ -138,36 +146,36 @@ def get_request_detail(
 ):
     query = """
         SELECT sr.*
-        FROM REGOPS_APP.tbl_globi_eu_am_99_ServiceRequests sr
-        WHERE sr.Id = ?
+        FROM regops_app.tbl_globi_eu_am_99_service_requests sr
+        WHERE sr.id = %s
     """
-    
+
     results = execute_query(query, (request_id,))
-    
+
     if not results:
         raise HTTPException(404, "Request not found")
-    
+
     request = results[0]
-    
+
     # RBAC check
     if token_data.role == Roles.CUSTOMER:
-        if request['CustomerNumber'] != token_data.customer_number:
+        if request['customer_number'] != token_data.customer_number:
             raise HTTPException(403, "Access denied")
-    
+
     elif token_data.role == Roles.SALES_TECH:
-        if request['Territory'] not in (token_data.territories or []):
+        if request['territory'] not in (token_data.territories or []):
             raise HTTPException(403, "Access denied")
-    
+
     # Get attachments
     attachments_query = """
-        SELECT Id, FileName, BlobPath, FileSize, ContentType, UploadedDate
-        FROM REGOPS_APP.tbl_globi_eu_am_99_Attachments
-        WHERE RequestId = ?
-        ORDER BY UploadedDate DESC
+        SELECT id, file_name, blob_path, file_size, content_type, uploaded_date
+        FROM regops_app.tbl_globi_eu_am_99_attachments
+        WHERE request_id = %s
+        ORDER BY uploaded_date DESC
     """
     attachments = execute_query(attachments_query, (request_id,))
     request['attachments'] = attachments
-    
+
     return request
 
 @router.patch("/{request_id}/status")
@@ -177,31 +185,35 @@ def update_request_status(
     token_data: TokenData = Depends(require_role([Roles.SALES_TECH, Roles.ADMIN]))
 ):
     allowed_statuses = ["Submitted", "In Progress", "Resolved", "Closed", "Cancelled"]
-    
+
     if new_status not in allowed_statuses:
         raise HTTPException(400, f"Invalid status. Allowed: {allowed_statuses}")
-    
+
     # RBAC for SalesTech
     if token_data.role == Roles.SALES_TECH:
-        check_query = "SELECT Territory FROM REGOPS_APP.tbl_globi_eu_am_99_ServiceRequests WHERE Id = ?"
+        check_query = """
+            SELECT territory
+            FROM regops_app.tbl_globi_eu_am_99_service_requests
+            WHERE id = %s
+        """
         result = execute_query(check_query, (request_id,))
-        
+
         if not result:
             raise HTTPException(404, "Request not found")
-        
-        if result[0]['Territory'] not in (token_data.territories or []):
+
+        if result[0]['territory'] not in (token_data.territories or []):
             raise HTTPException(403, "Access denied")
-    
+
     # Update
     update_query = """
-        UPDATE REGOPS_APP.tbl_globi_eu_am_99_ServiceRequests
-        SET Status = ?, LastModifiedDate = GETUTCDATE()
-        WHERE Id = ?
+        UPDATE regops_app.tbl_globi_eu_am_99_service_requests
+        SET status = %s, last_modified_date = CURRENT_TIMESTAMP
+        WHERE id = %s
     """
-    
+
     rows = execute_query(update_query, (new_status, request_id), fetch=False)
-    
+
     if rows == 0:
         raise HTTPException(404, "Request not found")
-    
+
     return {"message": "Status updated", "new_status": new_status}
