@@ -359,10 +359,11 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
       <div className="form-step">
         <h2 className="step-title">Basic Information</h2>
 
-        {/* Customer Search (for Admin/SalesTech only) */}
-        {shouldShowCustomerSearch() && (
-          <div className="form-section">
-            <h3>Customer</h3>
+        <div className={shouldShowCustomerSearch() ? "step-1-columns" : ""}>
+          {/* Customer Search (for Admin/SalesTech only) */}
+          {shouldShowCustomerSearch() && (
+            <div className="form-section">
+              <h3>Customer</h3>
             <div className="form-field">
               <label>Search Customer *</label>
               <div className="autocomplete-wrapper">
@@ -405,10 +406,10 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
                 </div>
               </div>
             )}
-          </div>
-        )}
+            </div>
+          )}
 
-        {/* Item Selection */}
+          {/* Item Selection */}
         <div className="form-section">
           <h3>Item Information</h3>
           <div className="form-field">
@@ -454,6 +455,7 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
               </div>
             </div>
           )}
+        </div>
         </div>
 
         {/* Issue Type */}
@@ -506,26 +508,28 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
         {/* Point of Contact */}
         <div className="form-section">
           <h3>Point of Contact</h3>
-          <div className="form-field">
-            <label>Name *</label>
-            <input
-              type="text"
-              value={formData.contact_name}
-              onChange={(e) => setFormData(prev => ({ ...prev, contact_name: e.target.value }))}
-              placeholder="Contact person name"
-              className="form-input"
-            />
-          </div>
+          <div className="poc-columns">
+            <div className="form-field">
+              <label>Name *</label>
+              <input
+                type="text"
+                value={formData.contact_name}
+                onChange={(e) => setFormData(prev => ({ ...prev, contact_name: e.target.value }))}
+                placeholder="Contact person name"
+                className="form-input"
+              />
+            </div>
 
-          <div className="form-field">
-            <label>Phone Number *</label>
-            <input
-              type="tel"
-              value={formData.contact_phone}
-              onChange={(e) => setFormData(prev => ({ ...prev, contact_phone: e.target.value }))}
-              placeholder="+1 234 567 8900"
-              className="form-input"
-            />
+            <div className="form-field">
+              <label>Phone Number *</label>
+              <input
+                type="tel"
+                value={formData.contact_phone}
+                onChange={(e) => setFormData(prev => ({ ...prev, contact_phone: e.target.value }))}
+                placeholder="+1 234 567 8900"
+                className="form-input"
+              />
+            </div>
           </div>
         </div>
 
@@ -704,7 +708,7 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
             </button>
           </div>
 
-          <div className="summary-block">
+          <div className="summary-block full-width">
             <h3>Details</h3>
             <div className="summary-content">
               <p><strong>Urgency:</strong> {formData.urgency_level}</p>
