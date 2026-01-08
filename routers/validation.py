@@ -174,35 +174,41 @@ def search_customers(
     - Sales/Tech can see only customers in their territories
     """
     from auth import Roles
-    
-    sql = """
-        SELECT 
-            c.customer_number,
-            c.customer_name,
-            c.territory_code,
-            c.country_code,
-            c.city,
-            c.phone_number
-        FROM regops_app.tbl_globi_eu_am_99_customers c
-        WHERE c.is_active = true
-    """
-    
-    params = []
 
-    # Territory filtering for Sales/Tech (not for Admin)
-    if token_data.role == Roles.SALES_TECH:
-        if token_data.territories and len(token_data.territories) > 0:
-            placeholders = ','.join(['%s'] * len(token_data.territories))
-            sql += f" AND c.territory_code IN ({placeholders})"
-            params.extend(token_data.territories)
-    
-    # Search query
-    if query:
-        sql += " AND (c.customer_name ILIKE %s OR c.customer_number ILIKE %s)"
-        search_param = f"%{query}%"
-        params.extend([search_param, search_param])
-    
-    sql += " ORDER BY c.customer_name LIMIT 50"
-    
-    results = execute_query(sql, tuple(params) if params else None)
-    return results
+    try:
+        sql = """
+            SELECT
+                c.customer_number,
+                c.customer_name,
+                c.territory_code,
+                c.country_code,
+                c.city,
+                c.phone_number
+            FROM regops_app.tbl_globi_eu_am_99_customers c
+            WHERE c.is_active = true
+        """
+
+        params = []
+
+        # Territory filtering for Sales/Tech (not for Admin)
+        if token_data.role == Roles.SALES_TECH:
+            if token_data.territories and len(token_data.territories) > 0:
+                placeholders = ','.join(['%s'] * len(token_data.territories))
+                sql += f" AND c.territory_code IN ({placeholders})"
+                params.extend(token_data.territories)
+
+        # Search query
+        if query:
+            sql += " AND (c.customer_name ILIKE %s OR c.customer_number ILIKE %s)"
+            search_param = f"%{query}%"
+            params.extend([search_param, search_param])
+
+        sql += " ORDER BY c.customer_name LIMIT 50"
+
+        results = execute_query(sql, tuple(params) if params else None)
+        return results
+    except Exception as e:
+        print(f"Error in customer search: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(500, f"Failed to search customers: {str(e)}")
