@@ -115,17 +115,24 @@ def submit_service_request(
                 repairability_status = item_result[0]['repairability_status']
 
         # Determine territory for routing (UR-046)
-        territory = None
+        territory_code = None
         if request.customer_number:
             territory_query = """
-                SELECT territory
-                FROM regops_app.tbl_globi_eu_am_99_customer_territories
+                SELECT territory_code
+                FROM regops_app.tbl_globi_eu_am_99_customers
                 WHERE customer_number = %s
                 LIMIT 1
             """
             territory_result = execute_query(territory_query, (request.customer_number,))
             if territory_result:
-                territory = territory_result[0]['territory']
+                territory_code = territory_result[0]['territory_code']
+
+        # If no customer_number (shouldn't happen for Customer role), use user's first territory
+        if not territory_code and token_data.territories:
+            territory_code = token_data.territories[0]
+
+        if not territory_code:
+            raise HTTPException(400, "Unable to determine territory for request")
 
         # Insert service request
         insert_query = """
@@ -138,7 +145,7 @@ def submit_service_request(
                 contact_phone,
                 contact_name,
                 country_code,
-                territory,
+                territory_code,
                 site_address,
                 serial_number,
                 item_number,
@@ -176,7 +183,7 @@ def submit_service_request(
             request.contact_phone,
             request.contact_name,
             request.country_code,
-            territory,
+            territory_code,
             request.site_address,
             request.serial_number,
             request.item_number,
