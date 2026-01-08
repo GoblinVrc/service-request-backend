@@ -29,10 +29,14 @@ def get_requests(
 ):
     query = """
         SELECT
-            sr.id, sr.request_type, sr.customer_number, sr.territory,
-            sr.serial_number, sr.lot_number, sr.item_number,
-            sr.main_reason, sr.sub_reason, sr.issue_description, sr.status,
-            sr.submitted_date, sr.submitted_by_email, sr.contact_email, sr.contact_phone
+            sr.id, sr.request_code, sr.request_type, sr.customer_number, sr.customer_name,
+            sr.country_code, sr.territory, sr.serial_number, sr.lot_number, sr.item_number,
+            sr.item_description, sr.product_family, sr.main_reason, sr.sub_reason,
+            sr.issue_description, sr.status, sr.submitted_date, sr.submitted_by_email,
+            sr.submitted_by_name, sr.contact_email, sr.contact_phone, sr.contact_name,
+            sr.urgency_level, sr.repairability_status, sr.last_modified_date,
+            sr.language_code, sr.site_address, sr.loaner_required, sr.loaner_details,
+            sr.quote_required, sr.customer_notes, sr.internal_notes, sr.requested_service_date
         FROM regops_app.tbl_globi_eu_am_99_service_requests sr
         WHERE 1=1
     """
