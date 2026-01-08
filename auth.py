@@ -49,10 +49,17 @@ async def verify_entra_token(request: Request) -> TokenData:
             # Parse JSON
             user_data = json.loads(user_json)
 
+            # Validate role
+            role = user_data.get("role", Roles.CUSTOMER)
+            valid_roles = [Roles.CUSTOMER, Roles.SALES_TECH, Roles.ADMIN]
+            if role not in valid_roles:
+                print(f"Invalid role in token: {role}, defaulting to Customer")
+                role = Roles.CUSTOMER
+
             # Return TokenData with actual user info
             return TokenData(
                 email=user_data.get("email", "unknown@stryker.com"),
-                role=user_data.get("role", Roles.CUSTOMER),
+                role=role,
                 name=user_data.get("name", "Unknown User"),
                 customer_number=user_data.get("customer_number"),
                 territories=user_data.get("territories")
@@ -80,9 +87,13 @@ async def verify_entra_token(request: Request) -> TokenData:
 def require_role(allowed_roles: list):
     """
     Role-based access control decorator.
-    Currently disabled for PoC - all users have access.
+    Verifies the user's role is in the allowed list.
     """
     async def role_checker(token_data: TokenData = Depends(verify_entra_token)):
-        # For PoC, allow all roles
+        if token_data.role not in allowed_roles:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Access denied. Required roles: {', '.join(allowed_roles)}"
+            )
         return token_data
     return role_checker

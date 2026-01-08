@@ -48,39 +48,39 @@ export interface IssueReason {
 }
 
 export interface ServiceRequest {
-  Id: number;
-  RequestCode: string;
-  RequestType: 'Serial' | 'Item' | 'General';
-  CustomerNumber?: string;
-  CustomerName?: string;
-  ContactEmail: string;
-  ContactPhone: string;
-  ContactName: string;
-  CountryCode: string;
-  Territory?: string;
-  SiteAddress?: string;
-  SerialNumber?: string;
-  ItemNumber?: string;
-  LotNumber?: string;
-  ItemDescription?: string;
-  ProductFamily?: string;
-  MainReason: string;
-  SubReason?: string;
-  IssueDescription?: string;
-  RepairabilityStatus?: string;
-  RequestedServiceDate?: string;
-  UrgencyLevel: 'Normal' | 'Urgent' | 'Critical';
-  LoanerRequired: boolean;
-  LoanerDetails?: string;
-  QuoteRequired: boolean;
-  Status: 'Submitted' | 'In Progress' | 'Resolved' | 'Closed' | 'Cancelled';
-  SubmittedByEmail: string;
-  SubmittedByName: string;
-  SubmittedDate: string;
-  LastModifiedDate: string;
-  LanguageCode: string;
-  CustomerNotes?: string;
-  InternalNotes?: string;
+  id: number;
+  request_code: string;
+  request_type: 'Serial' | 'Item' | 'General';
+  customer_number?: string;
+  customer_name?: string;
+  contact_email: string;
+  contact_phone: string;
+  contact_name: string;
+  country_code: string;
+  territory?: string;
+  site_address?: string;
+  serial_number?: string;
+  item_number?: string;
+  lot_number?: string;
+  item_description?: string;
+  product_family?: string;
+  main_reason: string;
+  sub_reason?: string;
+  issue_description?: string;
+  repairability_status?: string;
+  requested_service_date?: string;
+  urgency_level: 'Normal' | 'Urgent' | 'Critical';
+  loaner_required: boolean;
+  loaner_details?: string;
+  quote_required: boolean;
+  status: 'Submitted' | 'In Progress' | 'Resolved' | 'Closed' | 'Cancelled';
+  submitted_by_email: string;
+  submitted_by_name: string;
+  submitted_date: string;
+  last_modified_date: string;
+  language_code: string;
+  customer_notes?: string;
+  internal_notes?: string;
 }
 
 export interface ServiceRequestCreate {

@@ -44,16 +44,24 @@ def get_requests(
 
     # RBAC filtering
     if token_data.role == Roles.CUSTOMER:
+        if not token_data.customer_number:
+            raise HTTPException(400, "Customer number not found in authentication token")
         query += " AND sr.customer_number = %s"
         params.append(token_data.customer_number)
-
     elif token_data.role == Roles.SALES_TECH:
         if token_data.territories:
             placeholders = ','.join(['%s'] * len(token_data.territories))
             query += f" AND sr.territory IN ({placeholders})"
             params.extend(token_data.territories)
         else:
+            # SalesTech with no territories sees nothing
             return []
+    elif token_data.role == Roles.ADMIN:
+        # Admin sees all records - no filtering
+        pass
+    else:
+        # Unknown role - deny access
+        raise HTTPException(403, f"Unknown role: {token_data.role}")
 
     # Filters
     if status:

@@ -28,46 +28,8 @@ const Dashboard: React.FC = () => {
       }
 
       // Load service requests from API
-      const requestsData = await apiService.get<any[]>('/api/requests');
-
-      // Transform snake_case to PascalCase to match ServiceRequest type
-      const transformedRequests: ServiceRequest[] = requestsData.map((req: any) => ({
-        Id: req.id,
-        RequestCode: req.request_code || '',
-        RequestType: req.request_type || 'General',
-        CustomerNumber: req.customer_number,
-        CustomerName: req.customer_name,
-        ContactEmail: req.contact_email || '',
-        ContactPhone: req.contact_phone || '',
-        ContactName: req.contact_name || '',
-        CountryCode: req.country_code || '',
-        Territory: req.territory,
-        SiteAddress: req.site_address,
-        SerialNumber: req.serial_number,
-        ItemNumber: req.item_number,
-        LotNumber: req.lot_number,
-        ItemDescription: req.item_description,
-        ProductFamily: req.product_family,
-        MainReason: req.main_reason || '',
-        SubReason: req.sub_reason,
-        IssueDescription: req.issue_description,
-        RepairabilityStatus: req.repairability_status,
-        RequestedServiceDate: req.requested_service_date,
-        UrgencyLevel: req.urgency_level || 'Normal',
-        LoanerRequired: req.loaner_required || false,
-        LoanerDetails: req.loaner_details,
-        QuoteRequired: req.quote_required || false,
-        Status: req.status || 'Submitted',
-        SubmittedByEmail: req.submitted_by_email || '',
-        SubmittedByName: req.submitted_by_name || '',
-        SubmittedDate: req.submitted_date || '',
-        LastModifiedDate: req.last_modified_date || '',
-        LanguageCode: req.language_code || 'en',
-        CustomerNotes: req.customer_notes,
-        InternalNotes: req.internal_notes
-      }));
-
-      setRequests(transformedRequests);
+      const requestsData = await apiService.get<ServiceRequest[]>('/api/requests');
+      setRequests(requestsData);
     } catch (error) {
       console.error('Failed to load data:', error);
       setRequests([]); // Set empty array on error
@@ -91,12 +53,12 @@ const Dashboard: React.FC = () => {
   };
 
   const filteredRequests = requests.filter((req) => {
-    const matchesStatus = !filter.status || req.Status === filter.status;
+    const matchesStatus = !filter.status || req.status === filter.status;
     const matchesSearch =
       !filter.search ||
-      req.RequestCode.toLowerCase().includes(filter.search.toLowerCase()) ||
-      req.ContactName?.toLowerCase().includes(filter.search.toLowerCase()) ||
-      req.SerialNumber?.toLowerCase().includes(filter.search.toLowerCase());
+      req.request_code?.toLowerCase().includes(filter.search.toLowerCase()) ||
+      req.contact_name?.toLowerCase().includes(filter.search.toLowerCase()) ||
+      req.serial_number?.toLowerCase().includes(filter.search.toLowerCase());
     return matchesStatus && matchesSearch;
   });
 
@@ -157,19 +119,19 @@ const Dashboard: React.FC = () => {
           </div>
           <div className="stat-card">
             <div className="stat-value">
-              {requests.filter((r) => r.Status === 'Submitted').length}
+              {requests.filter((r) => r.status === 'Submitted').length}
             </div>
             <div className="stat-label">Submitted</div>
           </div>
           <div className="stat-card">
             <div className="stat-value">
-              {requests.filter((r) => r.Status === 'In Progress').length}
+              {requests.filter((r) => r.status === 'In Progress').length}
             </div>
             <div className="stat-label">In Progress</div>
           </div>
           <div className="stat-card">
             <div className="stat-value">
-              {requests.filter((r) => r.Status === 'Resolved').length}
+              {requests.filter((r) => r.status === 'Resolved').length}
             </div>
             <div className="stat-label">Resolved</div>
           </div>
@@ -224,23 +186,25 @@ const Dashboard: React.FC = () => {
                 </thead>
                 <tbody>
                   {filteredRequests.map((request) => (
-                    <tr key={request.Id}>
-                      <td className="request-code">{request.RequestCode}</td>
-                      <td>{request.ContactName}</td>
-                      <td>{request.SerialNumber || '-'}</td>
-                      <td className="issue-cell">{request.MainReason}</td>
+                    <tr key={request.id}>
+                      <td className="request-code">{request.request_code}</td>
+                      <td>{request.contact_name}</td>
+                      <td>{request.serial_number || '-'}</td>
+                      <td className="issue-cell">{request.main_reason}</td>
                       <td>
-                        <span className={getStatusBadgeClass(request.Status)}>
-                          {request.Status}
+                        <span className={getStatusBadgeClass(request.status)}>
+                          {request.status}
                         </span>
                       </td>
                       <td>
-                        {new Date(request.SubmittedDate).toLocaleDateString()}
+                        {request.submitted_date && !isNaN(new Date(request.submitted_date).getTime())
+                          ? new Date(request.submitted_date).toLocaleDateString()
+                          : 'N/A'}
                       </td>
                       <td>
                         <button
                           className="btn-view"
-                          onClick={() => handleViewRequest(request.Id)}
+                          onClick={() => handleViewRequest(request.id)}
                         >
                           View
                         </button>
