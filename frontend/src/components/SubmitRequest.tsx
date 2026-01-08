@@ -38,6 +38,7 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
     contact_phone: '',
     urgency_level: 'Normal',
     loaner_required: false,
+    quote_required: false,
     requested_service_date: '',
 
     // Contact (from localStorage)
@@ -188,6 +189,11 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
       return false;
     }
 
+    if (!formData.contact_name) {
+      setValidationMessage('Please provide a point of contact name');
+      return false;
+    }
+
     if (!formData.contact_phone) {
       setValidationMessage('Please provide a contact phone number');
       return false;
@@ -224,6 +230,7 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
         issue_description: formData.issue_description,
         urgency_level: formData.urgency_level,
         loaner_required: formData.loaner_required,
+        quote_required: formData.quote_required,
         requested_service_date: formData.requested_service_date || undefined,
       };
 
@@ -354,6 +361,17 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
 
           <div className="form-row">
             <div className="form-field">
+              <label>Point of Contact *</label>
+              <input
+                type="text"
+                value={formData.contact_name}
+                onChange={(e) => setFormData(prev => ({ ...prev, contact_name: e.target.value }))}
+                placeholder="Contact person name"
+                className="form-input"
+              />
+            </div>
+
+            <div className="form-field">
               <label>Contact Phone *</label>
               <input
                 type="tel"
@@ -363,7 +381,9 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
                 className="form-input"
               />
             </div>
+          </div>
 
+          <div className="form-row">
             <div className="form-field">
               <label>Urgency Level *</label>
               <select
@@ -389,15 +409,22 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
             />
           </div>
 
-          <div className="form-field">
-            <label className="checkbox-wrapper">
-              <input
-                type="checkbox"
-                checked={formData.loaner_required}
-                onChange={(e) => setFormData(prev => ({ ...prev, loaner_required: e.target.checked }))}
-              />
-              <span>Loaner equipment required</span>
-            </label>
+          <div className="toggle-cards">
+            <div
+              className={`toggle-card ${formData.loaner_required ? 'active' : ''}`}
+              onClick={() => setFormData(prev => ({ ...prev, loaner_required: !prev.loaner_required }))}
+            >
+              <div className="toggle-icon">{formData.loaner_required ? '✓' : ''}</div>
+              <div className="toggle-label">Loaner Required</div>
+            </div>
+
+            <div
+              className={`toggle-card ${formData.quote_required ? 'active' : ''}`}
+              onClick={() => setFormData(prev => ({ ...prev, quote_required: !prev.quote_required }))}
+            >
+              <div className="toggle-icon">{formData.quote_required ? '✓' : ''}</div>
+              <div className="toggle-label">Quote Required</div>
+            </div>
           </div>
         </div>
 
