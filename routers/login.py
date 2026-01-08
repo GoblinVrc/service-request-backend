@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, EmailStr
+from typing import Optional, List
 from database import execute_query
 from datetime import datetime
 
@@ -15,6 +16,7 @@ class LoginResponse(BaseModel):
     customer_number: str
     role: str
     customer_name: str
+    territories: Optional[List[str]] = None
 
 @router.post("/login", response_model=LoginResponse)
 def login(credentials: LoginRequest):
@@ -72,6 +74,18 @@ def login(credentials: LoginRequest):
     """
     execute_query(update_query, (datetime.now(), credentials.email), fetch=False)
 
+    # For SalesTech users, get their territories
+    territories = None
+    if user.get('role') == 'SalesTech':
+        territory_query = """
+            SELECT DISTINCT territory
+            FROM regops_app.tbl_globi_eu_am_99_salestech_territories
+            WHERE email = %s
+        """
+        territory_result = execute_query(territory_query, (user['email'],))
+        if territory_result:
+            territories = [row['territory'] for row in territory_result]
+
     # Return user data
     full_name = f"{user['first_name']} {user['last_name']}".strip()
 
@@ -80,5 +94,6 @@ def login(credentials: LoginRequest):
         name=full_name or "Unknown User",
         customer_number=user['customer_number'],
         customer_name=user['customer_name'],
-        role=user.get('role', 'Customer')
+        role=user.get('role', 'Customer'),
+        territories=territories
     )
