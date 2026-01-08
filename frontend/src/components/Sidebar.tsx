@@ -101,34 +101,6 @@ const Sidebar: React.FC<SidebarProps> = ({
             <span className="active-indicator" />
           )}
         </button>
-
-        <button
-          className={`sidebar-nav-item ${
-            currentView === 'my-requests' ? 'active' : ''
-          }`}
-          onClick={() => onNavigate('my-requests')}
-          title="My Requests"
-        >
-          <span className="nav-icon">📋</span>
-          {!isCollapsed && <span className="nav-text">My Requests</span>}
-          {!isCollapsed && currentView === 'my-requests' && (
-            <span className="active-indicator" />
-          )}
-        </button>
-
-        <button
-          className={`sidebar-nav-item ${
-            currentView === 'analytics' ? 'active' : ''
-          }`}
-          onClick={() => onNavigate('analytics')}
-          title="Analytics"
-        >
-          <span className="nav-icon">📊</span>
-          {!isCollapsed && <span className="nav-text">Analytics</span>}
-          {!isCollapsed && currentView === 'analytics' && (
-            <span className="active-indicator" />
-          )}
-        </button>
       </div>
 
       {/* Filters */}

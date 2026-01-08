@@ -363,4 +363,26 @@
   .sidebar-toggle {
     display: none;
   }
+
+  /* Hide all text content on small screens */
+  .logo-content,
+  .btn-text,
+  .nav-text,
+  .section-title,
+  .user-info,
+  .active-indicator,
+  .sidebar-section.filters-section {
+    display: none !important;
+  }
+
+  /* Center icons */
+  .btn-new-request,
+  .sidebar-nav-item,
+  .sidebar-user {
+    justify-content: center;
+  }
+
+  .sidebar-logo {
+    justify-content: center;
+  }
 }
