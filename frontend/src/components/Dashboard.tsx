@@ -15,6 +15,7 @@ interface Ticket {
   location: string;
   loaner_required: boolean;
   quote_required: boolean;
+  serial_number?: string;
 }
 
 interface DashboardProps {
@@ -58,6 +59,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onTicketClick, filters }) => {
             location: req.site_address || req.country_code,
             loaner_required: req.loaner_required,
             quote_required: req.quote_required,
+            serial_number: req.serial_number,
           };
         });
 
@@ -213,7 +215,48 @@ const Dashboard: React.FC<DashboardProps> = ({ onTicketClick, filters }) => {
         </div>
       </div>
 
-      {/* Tickets Table */}
+      {/* Tickets Card Grid (Mobile/Tablet) */}
+      <div className="tickets-card-grid">
+        {sortedTickets.map((ticket) => (
+          <div
+            key={ticket.id}
+            className="ticket-card"
+            onClick={() => onTicketClick(ticket.id)}
+          >
+            <div className="card-header">
+              <div className="card-id">{ticket.id}</div>
+              <span className={`status-badge ${getStatusColor(ticket.status)}`}>
+                {ticket.status}
+              </span>
+            </div>
+
+            <div className="card-serial">
+              {ticket.serial_number ? `Serial: ${ticket.serial_number}` : 'No serial number'}
+            </div>
+
+            <div className="card-loaner-quote">
+              <div className={`loaner-quote-card ${ticket.loaner_required ? 'active' : ''}`}>
+                <div className="lq-icon">{ticket.loaner_required ? '✓' : ''}</div>
+                <div className="lq-label">📦 Loaner</div>
+              </div>
+              <div className={`loaner-quote-card ${ticket.quote_required ? 'active' : ''}`}>
+                <div className="lq-icon">{ticket.quote_required ? '✓' : ''}</div>
+                <div className="lq-label">💰 Quote</div>
+              </div>
+            </div>
+          </div>
+        ))}
+
+        {sortedTickets.length === 0 && (
+          <div className="empty-state">
+            <div className="empty-icon">📭</div>
+            <h3>No tickets found</h3>
+            <p>Try adjusting your filters or search term</p>
+          </div>
+        )}
+      </div>
+
+      {/* Tickets Table (Desktop) */}
       <div className="tickets-container">
         <table className="tickets-table">
           <thead>
