@@ -16,7 +16,7 @@ class TokenData(BaseModel):
     territories: Optional[list] = None
     name: Optional[str] = None
 
-def verify_entra_token(request: Request) -> TokenData:
+async def verify_entra_token(request: Request) -> TokenData:
     """
     Simplified authentication for PoC.
     Extracts user data from the Bearer token sent by frontend.
@@ -82,7 +82,7 @@ def require_role(allowed_roles: list):
     Role-based access control decorator.
     Currently disabled for PoC - all users have access.
     """
-    def role_checker(token_data: TokenData = Depends(verify_entra_token)):
+    async def role_checker(token_data: TokenData = Depends(verify_entra_token)):
         # For PoC, allow all roles
         return token_data
     return role_checker
