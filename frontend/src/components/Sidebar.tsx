@@ -23,6 +23,25 @@ const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
+  // Get user data from localStorage
+  const getUserData = () => {
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      try {
+        return JSON.parse(userStr);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  };
+
+  const userData = getUserData();
+  const userName = userData?.name || 'Demo User';
+  const userRole = userData?.role || 'User';
+  const userTerritories = userData?.territories || [];
+  const userInitial = userName.charAt(0).toUpperCase();
+
   const statuses = ['All', 'Open', 'In Progress', 'Resolved', 'Closed'];
   const priorities = ['All', 'Low', 'Normal', 'High', 'Critical'];
 
@@ -188,17 +207,20 @@ const Sidebar: React.FC<SidebarProps> = ({
         {!isCollapsed && <div className="section-divider" />}
         <button
           className="sidebar-user"
-          title="Logout"
+          title={`Logout ${userName}`}
           onClick={() => {
             localStorage.clear();
             window.location.reload();
           }}
         >
-          <div className="user-avatar">D</div>
+          <div className="user-avatar">{userInitial}</div>
           {!isCollapsed && (
             <div className="user-info">
-              <div className="user-name">Demo User</div>
-              <div className="user-role">Administrator (Click to logout)</div>
+              <div className="user-name">{userName}</div>
+              <div className="user-role">
+                {userRole}
+                {userTerritories.length > 0 && ` (${userTerritories.join(', ')})`}
+              </div>
             </div>
           )}
         </button>
