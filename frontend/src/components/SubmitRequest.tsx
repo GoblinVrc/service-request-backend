@@ -3,6 +3,7 @@ import apiService from '../services/apiService';
 import { API_ENDPOINTS } from '../config/apiConfig';
 import { SubmitResponse } from '../types';
 import LoadingModal from './LoadingModal';
+import SuccessModal from './SuccessModal';
 import './SubmitRequest.css';
 
 interface SubmitRequestProps {
@@ -21,6 +22,10 @@ interface Item {
 const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => {
   const [loading, setLoading] = useState(false);
   const [validationMessage, setValidationMessage] = useState('');
+
+  // Success modal state
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successData, setSuccessData] = useState({ requestCode: '', nextSteps: '' });
 
   // Multi-step form state
   const [currentStep, setCurrentStep] = useState(1);
@@ -282,6 +287,11 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
     setUploadedFiles(prev => prev.filter((_, i) => i !== index));
   };
 
+  const handleSuccessClose = () => {
+    setShowSuccessModal(false);
+    onSubmit(); // Close form and refresh dashboard
+  };
+
   // Final submission
   const handleFinalSubmit = async () => {
     setLoading(true);
@@ -317,8 +327,11 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
 
       const response = (await apiService.post(API_ENDPOINTS.SUBMIT_REQUEST, submitData)) as SubmitResponse;
 
-      alert(`Request submitted successfully!\nRequest Code: ${response.request_code}\n\n${response.next_steps}`);
-      onSubmit();
+      setSuccessData({
+        requestCode: response.request_code,
+        nextSteps: response.next_steps,
+      });
+      setShowSuccessModal(true);
     } catch (error: any) {
       console.error('Failed to submit request:', error);
       setValidationMessage(error.response?.data?.detail || 'Failed to submit request. Please try again.');
@@ -762,6 +775,12 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
   return (
     <>
       <LoadingModal isVisible={loading} message="Submitting request..." />
+      <SuccessModal
+        isVisible={showSuccessModal}
+        requestCode={successData.requestCode}
+        nextSteps={successData.nextSteps}
+        onClose={handleSuccessClose}
+      />
       <div className="submit-request">
         <div className="submit-header">
           <div>

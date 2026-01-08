@@ -427,38 +427,22 @@
 
 /* ==================== CARD GRID LAYOUT ==================== */
 
-/* Hide card grid on large screens, show table */
+/* Default: Show card grid (mobile first - 2 cards), hide table */
 .tickets-card-grid {
-  display: none;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
 }
 
 .tickets-container {
-  display: block;
+  display: none;
 }
 
-/* Mobile: Show card grid (2 cards per row), hide table */
-@media (max-width: 767px) {
+/* Tablet: 4 cards per row */
+@media (min-width: 768px) {
   .tickets-card-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
-  }
-
-  .tickets-container {
-    display: none;
-  }
-}
-
-/* Tablet: Show card grid (4 cards per row), hide table */
-@media (min-width: 768px) and (max-width: 1199px) {
-  .tickets-card-grid {
-    display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 1.25rem;
-  }
-
-  .tickets-container {
-    display: none;
   }
 }
 
