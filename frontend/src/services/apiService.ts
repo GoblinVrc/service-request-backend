@@ -44,7 +44,10 @@ class ApiService {
     const user = localStorage.getItem('user');
     if (user) {
       // Return mock token (in production, get real token from backend)
-      return 'demo-token-' + btoa(user);
+      // Use proper UTF-8 encoding for btoa to handle special characters like ü in "Müller"
+      const utf8Bytes = new TextEncoder().encode(user);
+      const base64 = btoa(String.fromCharCode(...utf8Bytes));
+      return 'demo-token-' + base64;
     }
     return null;
   }
