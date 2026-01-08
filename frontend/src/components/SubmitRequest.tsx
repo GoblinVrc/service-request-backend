@@ -15,6 +15,7 @@ interface Item {
   item_description: string;
   serial_number?: string;
   product_family?: string;
+  instance_count?: number;
 }
 
 const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => {
@@ -159,7 +160,7 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
     try {
       const results = await apiService.get<Item[]>(
         API_ENDPOINTS.LOOKUP_ITEM,
-        { item: searchTerm }
+        { q: searchTerm }
       );
       setFilteredItems(results);
       setShowItemDropdown(results.length > 0);
