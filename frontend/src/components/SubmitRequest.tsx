@@ -23,6 +23,10 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
 
   // Form data
   const [formData, setFormData] = useState({
+    // Customer (for sales/tech/admin)
+    customer_number: '',
+    customer_name: '',
+
     // Item
     item_number: '',
     serial_number: '',
@@ -45,6 +49,11 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
     contact_name: '',
     contact_email: '',
   });
+
+  // Customer search (for sales/tech/admin)
+  const [customerSearchTerm, setCustomerSearchTerm] = useState('');
+  const [filteredCustomers, setFilteredCustomers] = useState<any[]>([]);
+  const [showCustomerDropdown, setShowCustomerDropdown] = useState(false);
 
   // Search/autocomplete
   const [itemSearchTerm, setItemSearchTerm] = useState('');
@@ -70,6 +79,51 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
         contact_email: user.email || '',
       }));
     }
+  };
+
+  const shouldShowCustomerSearch = () => {
+    const userStr = localStorage.getItem('user');
+    if (!userStr) return false;
+    try {
+      const user = JSON.parse(userStr);
+      const role = user.role;
+      return role === 'Admin' || role === 'SalesTech';
+    } catch {
+      return false;
+    }
+  };
+
+  const handleCustomerSearch = async (searchTerm: string) => {
+    setCustomerSearchTerm(searchTerm);
+
+    if (searchTerm.length < 2) {
+      setFilteredCustomers([]);
+      setShowCustomerDropdown(false);
+      return;
+    }
+
+    try {
+      const results = await apiService.get<any[]>(
+        API_ENDPOINTS.SEARCH_CUSTOMERS,
+        { query: searchTerm }
+      );
+      setFilteredCustomers(results);
+      setShowCustomerDropdown(results.length > 0);
+    } catch (error) {
+      console.error('Failed to search customers:', error);
+      setFilteredCustomers([]);
+      setShowCustomerDropdown(false);
+    }
+  };
+
+  const handleSelectCustomer = (customer: any) => {
+    setFormData(prev => ({
+      ...prev,
+      customer_number: customer.customer_number,
+      customer_name: customer.customer_name,
+    }));
+    setCustomerSearchTerm(customer.customer_name);
+    setShowCustomerDropdown(false);
   };
 
   const loadIssueReasons = async () => {
@@ -174,6 +228,12 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
   const validateForm = () => {
     setValidationMessage('');
 
+    // For Admin/SalesTech, require customer selection
+    if (shouldShowCustomerSearch() && !formData.customer_number) {
+      setValidationMessage('Please select a customer');
+      return false;
+    }
+
     if (!formData.item_number && !formData.serial_number) {
       setValidationMessage('Please select an item');
       return false;
@@ -212,12 +272,16 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
       const userStr = localStorage.getItem('user');
       const user = userStr ? JSON.parse(userStr) : null;
 
+      // Use selected customer if admin/sales chose one, otherwise use logged-in user's customer
+      const customerNumber = formData.customer_number || user?.customer_number || 'GUEST';
+      const customerName = formData.customer_name || user?.customer_name || 'Guest Customer';
+
       const submitData = {
         request_type: formData.serial_number ? 'Serial' : 'Item',
         country_code: 'US',
         language_code: 'en',
-        customer_number: user?.customer_number || 'GUEST',
-        customer_name: user?.customer_name || 'Guest Customer',
+        customer_number: customerNumber,
+        customer_name: customerName,
         contact_name: formData.contact_name,
         contact_email: formData.contact_email,
         contact_phone: formData.contact_phone,
@@ -259,6 +323,56 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
       </div>
 
       <form onSubmit={handleFinalSubmit} className="submit-form">
+        {/* Customer Search (for Admin/SalesTech only) */}
+        {shouldShowCustomerSearch() && (
+          <div className="form-section">
+            <h3>Customer Information</h3>
+
+            <div className="form-field">
+              <label>Search Customer *</label>
+              <div className="autocomplete-wrapper">
+                <input
+                  type="text"
+                  value={customerSearchTerm}
+                  onChange={(e) => handleCustomerSearch(e.target.value)}
+                  onFocus={() => filteredCustomers.length > 0 && setShowCustomerDropdown(true)}
+                  placeholder="Enter customer name or number..."
+                  className="form-input"
+                />
+
+                {showCustomerDropdown && filteredCustomers.length > 0 && (
+                  <div className="autocomplete-results">
+                    {filteredCustomers.map((customer, index) => (
+                      <div
+                        key={index}
+                        className="autocomplete-result-item"
+                        onClick={() => handleSelectCustomer(customer)}
+                      >
+                        <div className="item-info">
+                          <span className="item-badge">Customer: {customer.customer_number}</span>
+                          <span className="item-badge">Territory: {customer.territory_code}</span>
+                        </div>
+                        <div className="item-desc">{customer.customer_name}</div>
+                        <div className="item-family">{customer.city}, {customer.country_code}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {formData.customer_number && (
+              <div className="selected-item">
+                <h4>Selected Customer</h4>
+                <div className="item-details">
+                  <p><strong>Customer Number:</strong> {formData.customer_number}</p>
+                  <p><strong>Customer Name:</strong> {formData.customer_name}</p>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Item Selection */}
         <div className="form-section">
           <h3>Item Information</h3>

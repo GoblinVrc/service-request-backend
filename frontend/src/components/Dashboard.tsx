@@ -13,6 +13,8 @@ interface Ticket {
   priority: 'Low' | 'Normal' | 'High' | 'Critical';
   category: string;
   location: string;
+  loaner_required: boolean;
+  quote_required: boolean;
 }
 
 interface DashboardProps {
@@ -54,6 +56,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onTicketClick, filters }) => {
             priority: priorityMap[req.urgency_level] || 'Normal',
             category: req.main_reason,
             location: req.site_address || req.country_code,
+            loaner_required: req.loaner_required,
+            quote_required: req.quote_required,
           };
         });
 
@@ -214,30 +218,31 @@ const Dashboard: React.FC<DashboardProps> = ({ onTicketClick, filters }) => {
         <table className="tickets-table">
           <thead>
             <tr>
-              <th style={{ width: '10%' }}>ID</th>
-              <th style={{ width: '30%' }}>Subject</th>
+              <th style={{ width: '8%' }}>ID</th>
+              <th style={{ width: '26%' }}>Subject</th>
               <th
-                style={{ width: '12%', cursor: 'pointer' }}
+                style={{ width: '10%', cursor: 'pointer' }}
                 onClick={() => handleSort('status')}
               >
                 Status{' '}
                 {sortBy === 'status' && (sortOrder === 'asc' ? '↑' : '↓')}
               </th>
               <th
-                style={{ width: '12%', cursor: 'pointer' }}
+                style={{ width: '10%', cursor: 'pointer' }}
                 onClick={() => handleSort('priority')}
               >
                 Priority{' '}
                 {sortBy === 'priority' && (sortOrder === 'asc' ? '↑' : '↓')}
               </th>
               <th
-                style={{ width: '12%', cursor: 'pointer' }}
+                style={{ width: '10%', cursor: 'pointer' }}
                 onClick={() => handleSort('date')}
               >
                 Date {sortBy === 'date' && (sortOrder === 'asc' ? '↑' : '↓')}
               </th>
-              <th style={{ width: '12%' }}>Assignee</th>
-              <th style={{ width: '12%' }}>Location</th>
+              <th style={{ width: '6%' }}>L/Q</th>
+              <th style={{ width: '14%' }}>Assignee</th>
+              <th style={{ width: '16%' }}>Location</th>
             </tr>
           </thead>
           <tbody>
@@ -269,6 +274,16 @@ const Dashboard: React.FC<DashboardProps> = ({ onTicketClick, filters }) => {
                   </span>
                 </td>
                 <td className="ticket-date">{ticket.date}</td>
+                <td>
+                  <div className="loaner-quote-icons">
+                    {ticket.loaner_required && (
+                      <span className="icon-loaner" title="Loaner Required">📦</span>
+                    )}
+                    {ticket.quote_required && (
+                      <span className="icon-quote" title="Quote Required">💰</span>
+                    )}
+                  </div>
+                </td>
                 <td>
                   <div className="assignee">
                     <div className="assignee-avatar">

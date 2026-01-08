@@ -162,3 +162,46 @@ def validate_customer(
         "customer": customer,
         "message": "Customer found. Form will be auto-filled."
     }
+
+@router.get("/customers/search")
+def search_customers(
+    query: Optional[str] = None,
+    token_data: TokenData = Depends(verify_entra_token)
+):
+    """
+    Search customers for sales/tech/admin users
+    - Admin can see all customers
+    - Sales/Tech can see only customers in their territories
+    """
+    from auth import Roles
+    
+    sql = """
+        SELECT 
+            c.customer_number,
+            c.customer_name,
+            c.territory_code,
+            c.country_code,
+            c.city,
+            c.phone_number
+        FROM regops_app.tbl_globi_eu_am_99_customers c
+        WHERE c.is_active = true
+    """
+    
+    params = []
+    
+    # Territory filtering for Sales/Tech
+    if token_data.role == Roles.SALES_TECH and token_data.territories:
+        placeholders = ','.join(['%s'] * len(token_data.territories))
+        sql += f" AND c.territory_code IN ({placeholders})"
+        params.extend(token_data.territories)
+    
+    # Search query
+    if query:
+        sql += " AND (c.customer_name ILIKE %s OR c.customer_number ILIKE %s)"
+        search_param = f"%{query}%"
+        params.extend([search_param, search_param])
+    
+    sql += " ORDER BY c.customer_name LIMIT 50"
+    
+    results = execute_query(sql, tuple(params) if params else None)
+    return results

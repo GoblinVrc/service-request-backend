@@ -403,3 +403,24 @@
     min-width: 900px;
   }
 }
+
+/* Loaner/Quote Icons */
+.loaner-quote-icons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 1.1rem;
+}
+
+.icon-loaner,
+.icon-quote {
+  display: inline-block;
+  cursor: default;
+}
+
+.icon-loaner:hover,
+.icon-quote:hover {
+  transform: scale(1.2);
+  transition: transform 0.2s ease;
+}

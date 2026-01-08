@@ -14,6 +14,7 @@ export const API_ENDPOINTS = {
   // Validation
   VALIDATE_ITEM: '/api/validate/item',
   VALIDATE_CUSTOMER: '/api/validate/customer',
+  SEARCH_CUSTOMERS: '/api/customers/search',
 
   // Intake
   SUBMIT_REQUEST: '/api/intake/submit',

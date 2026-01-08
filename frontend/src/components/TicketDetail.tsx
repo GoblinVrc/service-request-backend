@@ -1,4 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import apiService from '../services/apiService';
+import { ServiceRequest } from '../types';
+import LoadingModal from './LoadingModal';
 import './TicketDetail.css';
 
 interface TicketDetailProps {
@@ -8,29 +11,61 @@ interface TicketDetailProps {
 
 const TicketDetail: React.FC<TicketDetailProps> = ({ ticketId, onClose }) => {
   const [activeTab, setActiveTab] = useState<'details' | 'history' | 'comments'>('details');
+  const [request, setRequest] = useState<ServiceRequest | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Mock ticket data
+  const loadRequestDetails = React.useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const requests = await apiService.get<ServiceRequest[]>('/api/requests');
+      const foundRequest = requests.find(r => r.request_code === ticketId);
+      setRequest(foundRequest || null);
+    } catch (error) {
+      console.error('Failed to load request details:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [ticketId]);
+
+  useEffect(() => {
+    loadRequestDetails();
+  }, [loadRequestDetails]);
+
+  if (isLoading) {
+    return <LoadingModal isVisible={true} message="Loading request details..." />;
+  }
+
+  if (!request) {
+    return (
+      <div className="ticket-detail">
+        <div className="detail-main">
+          <div className="detail-header">
+            <h1>Request not found</h1>
+            <button onClick={onClose} className="btn-close-detail">✕</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Map data for display
   const ticket = {
-    id: ticketId,
-    subject: 'Equipment malfunction in OR-3',
-    status: 'Open',
-    priority: 'Critical',
-    category: 'Equipment',
-    location: 'Operating Room 3',
-    date: '2026-01-07',
-    assignee: 'John Smith',
-    description: 'The surgical equipment in Operating Room 3 is experiencing intermittent power issues. This is affecting scheduled procedures and requires immediate attention.',
-    reporter: 'Dr. Sarah Williams',
+    id: request.request_code,
+    subject: request.item_description || request.main_reason || 'Service Request',
+    status: request.status === 'Submitted' ? 'Open' : request.status,
+    priority: request.urgency_level === 'Urgent' ? 'High' : request.urgency_level,
+    category: request.main_reason,
+    date: request.submitted_date ? new Date(request.submitted_date).toISOString().split('T')[0] : 'N/A',
+    assignee: request.territory_code || 'Unassigned',
+    contactName: request.contact_name,
+    contactPhone: request.contact_phone,
+    additionalComments: request.issue_description || 'No additional comments provided',
+    loanerRequired: request.loaner_required,
+    quoteRequired: request.quote_required,
     history: [
-      { date: '2026-01-07 10:30', action: 'Ticket created', user: 'Dr. Sarah Williams' },
-      { date: '2026-01-07 10:45', action: 'Assigned to John Smith', user: 'System' },
-      { date: '2026-01-07 11:00', action: 'Priority set to Critical', user: 'Manager' },
+      { date: request.submitted_date || '', action: 'Request submitted', user: request.submitted_by_name },
     ],
-    attachments: [
-      { name: 'equipment_photo.jpg', size: '2.4 MB', type: 'image' },
-      { name: 'error_log.pdf', size: '156 KB', type: 'pdf' },
-      { name: 'maintenance_history.xlsx', size: '45 KB', type: 'excel' },
-    ],
+    attachments: [] as Array<{ name: string; size: string; type: string }>,
   };
 
   return (
@@ -47,11 +82,11 @@ const TicketDetail: React.FC<TicketDetailProps> = ({ ticketId, onClose }) => {
               </span>
               <span className="meta-item">
                 <span className="meta-icon">👤</span>
-                {ticket.reporter}
+                {ticket.contactName}
               </span>
               <span className="meta-item">
-                <span className="meta-icon">📍</span>
-                {ticket.location}
+                <span className="meta-icon">📞</span>
+                {ticket.contactPhone}
               </span>
             </div>
           </div>
@@ -98,15 +133,35 @@ const TicketDetail: React.FC<TicketDetailProps> = ({ ticketId, onClose }) => {
                 <div className="info-item">
                   <div className="info-label">Assignee</div>
                   <div className="assignee-chip">
-                    <div className="assignee-avatar-small">J</div>
+                    <div className="assignee-avatar-small">{ticket.assignee.charAt(0)}</div>
                     {ticket.assignee}
+                  </div>
+                </div>
+                <div className="info-item">
+                  <div className="info-label">Loaner Required</div>
+                  <div className="info-value">
+                    {ticket.loanerRequired ? (
+                      <span className="requirement-badge requirement-yes">📦 Yes</span>
+                    ) : (
+                      <span className="requirement-badge requirement-no">No</span>
+                    )}
+                  </div>
+                </div>
+                <div className="info-item">
+                  <div className="info-label">Quote Required</div>
+                  <div className="info-value">
+                    {ticket.quoteRequired ? (
+                      <span className="requirement-badge requirement-yes">💰 Yes</span>
+                    ) : (
+                      <span className="requirement-badge requirement-no">No</span>
+                    )}
                   </div>
                 </div>
               </div>
 
               <div className="description-section">
-                <h3>Description</h3>
-                <p>{ticket.description}</p>
+                <h3>Additional Comments</h3>
+                <p>{ticket.additionalComments}</p>
               </div>
 
               <div className="action-buttons">

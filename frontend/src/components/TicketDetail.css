@@ -465,3 +465,25 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Requirement Badges */
+.requirement-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.requirement-yes {
+  background: linear-gradient(135deg, var(--stryker-gold) 0%, #e69500 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(255, 163, 0, 0.3);
+}
+
+.requirement-no {
+  background: #f1f3f5;
+  color: #868e96;
+}
