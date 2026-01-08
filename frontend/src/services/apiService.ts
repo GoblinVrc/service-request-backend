@@ -46,7 +46,7 @@ class ApiService {
       // Return mock token (in production, get real token from backend)
       // Use proper UTF-8 encoding for btoa to handle special characters like ü in "Müller"
       const utf8Bytes = new TextEncoder().encode(user);
-      const base64 = btoa(String.fromCharCode(...utf8Bytes));
+      const base64 = btoa(String.fromCharCode.apply(null, Array.from(utf8Bytes)));
       return 'demo-token-' + base64;
     }
     return null;
