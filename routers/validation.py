@@ -181,7 +181,9 @@ def search_customers(
                 c.customer_number,
                 c.customer_name,
                 c.territory_code,
-                c.country_code
+                c.country_code,
+                c.city,
+                c.address_line1
             FROM regops_app.tbl_globi_eu_am_99_customers c
             WHERE c.is_active = true
         """
