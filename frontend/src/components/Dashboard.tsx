@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import apiService from '../services/apiService';
 import { ServiceRequest } from '../types';
+import LoadingModal from './LoadingModal';
 import './Dashboard.css';
 
 interface Ticket {
@@ -24,10 +25,12 @@ const Dashboard: React.FC<DashboardProps> = ({ onTicketClick, filters }) => {
   const [sortBy, setSortBy] = useState<'date' | 'priority' | 'status'>('date');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [searchTerm, setSearchTerm] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   // Load service requests from API
   useEffect(() => {
     const loadRequests = async () => {
+      setIsLoading(true);
       try {
         const requests = await apiService.get<ServiceRequest[]>('/api/requests');
 
@@ -59,6 +62,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onTicketClick, filters }) => {
         console.error('Failed to load requests:', error);
         // Keep empty array on error
         setTickets([]);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -136,7 +141,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onTicketClick, filters }) => {
   };
 
   return (
-    <div className="dashboard">
+    <>
+      <LoadingModal isVisible={isLoading} message="Loading service requests..." />
+      <div className="dashboard">
       {/* Header */}
       <div className="dashboard-header">
         <div className="header-left">
@@ -285,6 +292,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onTicketClick, filters }) => {
         )}
       </div>
     </div>
+    </>
   );
 };
 

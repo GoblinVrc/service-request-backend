@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import apiService from '../services/apiService';
 import { API_ENDPOINTS } from '../config/apiConfig';
 import { SubmitResponse } from '../types';
+import LoadingModal from './LoadingModal';
 import './SubmitRequest.css';
 
 interface SubmitRequestProps {
@@ -239,7 +240,9 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
   };
 
   return (
-    <div className="submit-request">
+    <>
+      <LoadingModal isVisible={loading} message="Submitting request..." />
+      <div className="submit-request">
       <div className="submit-header">
         <div>
           <h1>New Service Request</h1>
@@ -414,6 +417,7 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
         </div>
       </form>
     </div>
+    </>
   );
 };
 
