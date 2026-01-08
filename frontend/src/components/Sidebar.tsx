@@ -186,12 +186,19 @@ const Sidebar: React.FC<SidebarProps> = ({
       {/* User Section */}
       <div className="sidebar-footer">
         {!isCollapsed && <div className="section-divider" />}
-        <button className="sidebar-user" title="User Profile">
+        <button
+          className="sidebar-user"
+          title="Logout"
+          onClick={() => {
+            localStorage.clear();
+            window.location.reload();
+          }}
+        >
           <div className="user-avatar">D</div>
           {!isCollapsed && (
             <div className="user-info">
               <div className="user-name">Demo User</div>
-              <div className="user-role">Administrator</div>
+              <div className="user-role">Administrator (Click to logout)</div>
             </div>
           )}
         </button>

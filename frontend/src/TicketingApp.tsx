@@ -9,7 +9,11 @@ import './TicketingApp.css';
 type ViewType = 'dashboard' | 'my-requests' | 'analytics' | 'submit' | 'detail';
 
 const TicketingApp: React.FC = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+    // Check if user is already logged in
+    const user = localStorage.getItem('user');
+    return !!user;
+  });
   const [currentView, setCurrentView] = useState<ViewType>('dashboard');
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
   const [filters, setFilters] = useState({
