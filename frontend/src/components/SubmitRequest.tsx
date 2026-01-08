@@ -21,6 +21,10 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
   const [loading, setLoading] = useState(false);
   const [validationMessage, setValidationMessage] = useState('');
 
+  // Multi-step form state
+  const [currentStep, setCurrentStep] = useState(1);
+  const totalSteps = 4;
+
   // Form data
   const [formData, setFormData] = useState({
     // Customer (for sales/tech/admin)
@@ -40,7 +44,7 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
     // Details
     issue_description: '',
     contact_phone: '',
-    urgency_level: 'Normal',
+    urgency_level: 'Normal' as 'Normal' | 'Urgent' | 'Critical',
     loaner_required: false,
     quote_required: false,
     requested_service_date: '',
@@ -50,12 +54,15 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
     contact_email: '',
   });
 
+  // File upload state
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+
   // Customer search (for sales/tech/admin)
   const [customerSearchTerm, setCustomerSearchTerm] = useState('');
   const [filteredCustomers, setFilteredCustomers] = useState<any[]>([]);
   const [showCustomerDropdown, setShowCustomerDropdown] = useState(false);
 
-  // Search/autocomplete
+  // Item search/autocomplete
   const [itemSearchTerm, setItemSearchTerm] = useState('');
   const [filteredItems, setFilteredItems] = useState<Item[]>([]);
   const [showItemDropdown, setShowItemDropdown] = useState(false);
@@ -93,6 +100,19 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
     }
   };
 
+  const loadIssueReasons = async () => {
+    try {
+      const reasons = await apiService.get<Record<string, string[]>>(
+        API_ENDPOINTS.ISSUE_REASONS,
+        { language: 'en' }
+      );
+      setIssueReasons(reasons);
+    } catch (error) {
+      console.error('Failed to load issue reasons:', error);
+    }
+  };
+
+  // Customer search handler
   const handleCustomerSearch = async (searchTerm: string) => {
     setCustomerSearchTerm(searchTerm);
 
@@ -126,25 +146,7 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
     setShowCustomerDropdown(false);
   };
 
-  const loadIssueReasons = async () => {
-    try {
-      const reasons = await apiService.get<Record<string, string[]>>(
-        API_ENDPOINTS.ISSUE_REASONS,
-        { language_code: 'en' }
-      );
-      setIssueReasons(reasons);
-    } catch (error) {
-      console.error('Failed to load issue reasons, using dummy data:', error);
-      // Fallback: Dummy data
-      setIssueReasons({
-        'Equipment Malfunction': ['Equipment Not Responding', 'Display Issue', 'Mechanical Failure', 'Error Messages'],
-        'Preventive Maintenance': ['Scheduled Maintenance Due', 'Calibration Required', 'Software Update'],
-        'Installation Required': [],
-        'Other': [],
-      });
-    }
-  };
-
+  // Item search handler
   const handleItemSearch = async (searchTerm: string) => {
     setItemSearchTerm(searchTerm);
 
@@ -155,51 +157,16 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
     }
 
     try {
-      // Try API first, fall back to dummy data
-      try {
-        const serialResults = await apiService.get<any[]>(
-          API_ENDPOINTS.LOOKUP_SERIAL,
-          { q: searchTerm }
-        );
-
-        const itemResults = await apiService.get<any[]>(
-          API_ENDPOINTS.LOOKUP_ITEM,
-          { q: searchTerm }
-        );
-
-        const combined = [...serialResults, ...itemResults];
-        if (combined.length > 0) {
-          setFilteredItems(combined);
-          setShowItemDropdown(true);
-          return;
-        }
-      } catch (apiError) {
-        console.log('API not available, using dummy data');
-      }
-
-      // Fallback: Dummy data for demo
-      const dummyItems: Item[] = [
-        { item_number: 'ITEM-SUR-001', serial_number: 'SN-2024-001', item_description: 'Advanced Surgical System Model X200', product_family: 'Surgical Systems' },
-        { item_number: 'ITEM-SUR-002', serial_number: 'SN-2024-002', item_description: 'Minimally Invasive Surgical Tower', product_family: 'Surgical Systems' },
-        { item_number: 'ITEM-DIA-001', serial_number: 'SN-2024-006', item_description: 'Ultrasound System ProView 5000', product_family: 'Diagnostic Imaging' },
-        { item_number: 'ITEM-DIA-002', serial_number: 'SN-2024-007', item_description: 'Portable X-Ray Unit Mobile Max', product_family: 'Diagnostic Imaging' },
-        { item_number: 'ITEM-MON-001', serial_number: 'SN-2024-011', item_description: 'Vital Signs Monitor ProLife 800', product_family: 'Patient Monitoring' },
-        { item_number: 'ITEM-MON-002', serial_number: 'SN-2024-012', item_description: 'ECG Machine CardioView 12-Lead', product_family: 'Patient Monitoring' },
-        { item_number: 'ITEM-LAB-001', serial_number: 'SN-2024-016', item_description: 'Blood Analyzer Hema-Pro 500', product_family: 'Laboratory' },
-        { item_number: 'ITEM-STE-001', serial_number: 'SN-2024-021', item_description: 'Autoclave Steam Sterilizer 500L', product_family: 'Sterilization' },
-      ];
-
-      const searchLower = searchTerm.toLowerCase();
-      const filtered = dummyItems.filter(item =>
-        (item.serial_number && item.serial_number.toLowerCase().includes(searchLower)) ||
-        item.item_number.toLowerCase().includes(searchLower) ||
-        item.item_description.toLowerCase().includes(searchLower)
+      const results = await apiService.get<Item[]>(
+        API_ENDPOINTS.LOOKUP_ITEM,
+        { item: searchTerm }
       );
-
-      setFilteredItems(filtered);
-      setShowItemDropdown(filtered.length > 0);
+      setFilteredItems(results);
+      setShowItemDropdown(results.length > 0);
     } catch (error) {
       console.error('Failed to search items:', error);
+      setFilteredItems([]);
+      setShowItemDropdown(false);
     }
   };
 
@@ -211,21 +178,21 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
       item_description: item.item_description,
       product_family: item.product_family || '',
     }));
-    setItemSearchTerm(item.serial_number || item.item_number);
+    setItemSearchTerm(`${item.item_number} - ${item.item_description}`);
     setShowItemDropdown(false);
-    setValidationMessage('');
   };
 
   const handleMainReasonChange = (mainReason: string) => {
     setFormData(prev => ({
       ...prev,
       main_reason: mainReason,
-      sub_reason: '',
+      sub_reason: '', // Reset sub reason
     }));
     setAvailableSubReasons(issueReasons[mainReason] || []);
   };
 
-  const validateForm = () => {
+  // Step validation
+  const validateStep1 = (): boolean => {
     setValidationMessage('');
 
     // For Admin/SalesTech, require customer selection
@@ -244,10 +211,11 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
       return false;
     }
 
-    if (!formData.issue_description || formData.issue_description.trim().length < 10) {
-      setValidationMessage('Please provide a detailed description (at least 10 characters)');
-      return false;
-    }
+    return true;
+  };
+
+  const validateStep2 = (): boolean => {
+    setValidationMessage('');
 
     if (!formData.contact_name) {
       setValidationMessage('Please provide a point of contact name');
@@ -259,14 +227,62 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
       return false;
     }
 
+    if (!formData.issue_description || formData.issue_description.trim().length < 10) {
+      setValidationMessage('Please provide a detailed description (at least 10 characters)');
+      return false;
+    }
+
     return true;
   };
 
-  const handleFinalSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const validateStep3 = (): boolean => {
+    // File upload is optional
+    return true;
+  };
 
-    if (!validateForm()) return;
+  // Navigation handlers
+  const handleNext = () => {
+    let isValid = false;
 
+    switch (currentStep) {
+      case 1:
+        isValid = validateStep1();
+        break;
+      case 2:
+        isValid = validateStep2();
+        break;
+      case 3:
+        isValid = validateStep3();
+        break;
+      default:
+        isValid = true;
+    }
+
+    if (isValid && currentStep < totalSteps) {
+      setCurrentStep(currentStep + 1);
+      setValidationMessage('');
+    }
+  };
+
+  const handleBack = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+      setValidationMessage('');
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setUploadedFiles(Array.from(e.target.files));
+    }
+  };
+
+  const handleRemoveFile = (index: number) => {
+    setUploadedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  // Final submission
+  const handleFinalSubmit = async () => {
     setLoading(true);
     try {
       const userStr = localStorage.getItem('user');
@@ -310,24 +326,42 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
     }
   };
 
-  return (
-    <>
-      <LoadingModal isVisible={loading} message="Submitting request..." />
-      <div className="submit-request">
-      <div className="submit-header">
-        <div>
-          <h1>New Service Request</h1>
-          <p>Fill in the details below to create a new service request</p>
-        </div>
-        <button onClick={onCancel} className="btn-close">✕</button>
-      </div>
+  // Render progress indicator
+  const renderProgressIndicator = () => {
+    const steps = [
+      { number: 1, label: 'Basic Info' },
+      { number: 2, label: 'Details' },
+      { number: 3, label: 'Attachments' },
+      { number: 4, label: 'Review' },
+    ];
 
-      <form onSubmit={handleFinalSubmit} className="submit-form">
+    return (
+      <div className="progress-indicator">
+        {steps.map((step, index) => (
+          <React.Fragment key={step.number}>
+            <div className={`progress-step ${currentStep >= step.number ? 'active' : ''} ${currentStep === step.number ? 'current' : ''}`}>
+              <div className="step-number">{step.number}</div>
+              <div className="step-label">{step.label}</div>
+            </div>
+            {index < steps.length - 1 && (
+              <div className={`progress-line ${currentStep > step.number ? 'active' : ''}`} />
+            )}
+          </React.Fragment>
+        ))}
+      </div>
+    );
+  };
+
+  // Render Step 1: Basic Information
+  const renderStep1 = () => {
+    return (
+      <div className="form-step">
+        <h2 className="step-title">Basic Information</h2>
+
         {/* Customer Search (for Admin/SalesTech only) */}
         {shouldShowCustomerSearch() && (
           <div className="form-section">
-            <h3>Customer Information</h3>
-
+            <h3>Customer</h3>
             <div className="form-field">
               <label>Search Customer *</label>
               <div className="autocomplete-wrapper">
@@ -376,7 +410,6 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
         {/* Item Selection */}
         <div className="form-section">
           <h3>Item Information</h3>
-
           <div className="form-field">
             <label>Search Item *</label>
             <div className="autocomplete-wrapper">
@@ -398,11 +431,11 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
                       onClick={() => handleSelectItem(item)}
                     >
                       <div className="item-info">
-                        {item.serial_number && <span className="item-badge">SN: {item.serial_number}</span>}
                         <span className="item-badge">Item: {item.item_number}</span>
+                        {item.serial_number && <span className="item-badge">Serial: {item.serial_number}</span>}
                       </div>
                       <div className="item-desc">{item.item_description}</div>
-                      {item.product_family && <div className="item-family">{item.product_family}</div>}
+                      <div className="item-family">{item.product_family}</div>
                     </div>
                   ))}
                 </div>
@@ -414,7 +447,6 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
             <div className="selected-item">
               <h4>Selected Item</h4>
               <div className="item-details">
-                {formData.serial_number && <p><strong>Serial Number:</strong> {formData.serial_number}</p>}
                 <p><strong>Item Number:</strong> {formData.item_number}</p>
                 <p><strong>Description:</strong> {formData.item_description}</p>
                 {formData.product_family && <p><strong>Product Family:</strong> {formData.product_family}</p>}
@@ -426,7 +458,6 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
         {/* Issue Type */}
         <div className="form-section">
           <h3>Issue Type</h3>
-
           <div className="form-field">
             <label>Main Issue Type *</label>
             <select
@@ -435,94 +466,102 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
               className="form-input"
             >
               <option value="">Select main issue type...</option>
-              {Object.keys(issueReasons).map(reason => (
-                <option key={reason} value={reason}>{reason}</option>
+              {Object.keys(issueReasons).map((reason) => (
+                <option key={reason} value={reason}>
+                  {reason}
+                </option>
               ))}
             </select>
           </div>
 
           {availableSubReasons.length > 0 && (
             <div className="form-field">
-              <label>Sub-Issue Type</label>
+              <label>Sub Issue Type</label>
               <select
                 value={formData.sub_reason}
                 onChange={(e) => setFormData(prev => ({ ...prev, sub_reason: e.target.value }))}
                 className="form-input"
               >
-                <option value="">Select sub-issue type (optional)...</option>
-                {availableSubReasons.map(subReason => (
-                  <option key={subReason} value={subReason}>{subReason}</option>
+                <option value="">Select sub issue type...</option>
+                {availableSubReasons.map((subReason) => (
+                  <option key={subReason} value={subReason}>
+                    {subReason}
+                  </option>
                 ))}
               </select>
             </div>
           )}
         </div>
+      </div>
+    );
+  };
 
-        {/* Additional Details */}
+  // Render Step 2: Additional Details
+  const renderStep2 = () => {
+    return (
+      <div className="form-step">
+        <h2 className="step-title">Additional Details</h2>
+
+        {/* Point of Contact */}
         <div className="form-section">
-          <h3>Additional Details</h3>
+          <h3>Point of Contact</h3>
+          <div className="form-field">
+            <label>Name *</label>
+            <input
+              type="text"
+              value={formData.contact_name}
+              onChange={(e) => setFormData(prev => ({ ...prev, contact_name: e.target.value }))}
+              placeholder="Contact person name"
+              className="form-input"
+            />
+          </div>
 
           <div className="form-field">
-            <label>Issue Description *</label>
+            <label>Phone Number *</label>
+            <input
+              type="tel"
+              value={formData.contact_phone}
+              onChange={(e) => setFormData(prev => ({ ...prev, contact_phone: e.target.value }))}
+              placeholder="+1 234 567 8900"
+              className="form-input"
+            />
+          </div>
+        </div>
+
+        {/* Description */}
+        <div className="form-section">
+          <h3>Issue Description</h3>
+          <div className="form-field">
+            <label>Additional Comments *</label>
             <textarea
               value={formData.issue_description}
               onChange={(e) => setFormData(prev => ({ ...prev, issue_description: e.target.value }))}
-              placeholder="Please describe the issue in detail..."
-              rows={5}
+              placeholder="Provide detailed information about the issue..."
+              rows={6}
               className="form-input"
             />
           </div>
+        </div>
 
-          <div className="form-row">
-            <div className="form-field">
-              <label>Point of Contact *</label>
-              <input
-                type="text"
-                value={formData.contact_name}
-                onChange={(e) => setFormData(prev => ({ ...prev, contact_name: e.target.value }))}
-                placeholder="Contact person name"
-                className="form-input"
-              />
-            </div>
-
-            <div className="form-field">
-              <label>Contact Phone *</label>
-              <input
-                type="tel"
-                value={formData.contact_phone}
-                onChange={(e) => setFormData(prev => ({ ...prev, contact_phone: e.target.value }))}
-                placeholder="e.g., +1-555-123-4567"
-                className="form-input"
-              />
-            </div>
-          </div>
-
-          <div className="form-row">
-            <div className="form-field">
-              <label>Urgency Level *</label>
-              <select
-                value={formData.urgency_level}
-                onChange={(e) => setFormData(prev => ({ ...prev, urgency_level: e.target.value }))}
-                className="form-input"
-              >
-                <option value="Normal">Normal</option>
-                <option value="Urgent">Urgent</option>
-                <option value="Critical">Critical</option>
-              </select>
-            </div>
-          </div>
-
+        {/* Urgency */}
+        <div className="form-section">
+          <h3>Urgency Level</h3>
           <div className="form-field">
-            <label>Requested Service Date</label>
-            <input
-              type="date"
-              value={formData.requested_service_date}
-              onChange={(e) => setFormData(prev => ({ ...prev, requested_service_date: e.target.value }))}
+            <select
+              value={formData.urgency_level}
+              onChange={(e) => setFormData(prev => ({ ...prev, urgency_level: e.target.value as any }))}
               className="form-input"
-              min={new Date().toISOString().split('T')[0]}
-            />
+            >
+              <option value="Normal">Normal</option>
+              <option value="Urgent">Urgent</option>
+              <option value="Critical">Critical</option>
+            </select>
           </div>
+        </div>
 
+        {/* Loaner/Quote Toggle Cards */}
+        <div className="form-section">
+          <h3>Service Options</h3>
           <div className="toggle-cards">
             <div
               className={`toggle-card ${formData.loaner_required ? 'active' : ''}`}
@@ -531,7 +570,6 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
               <div className="toggle-icon">{formData.loaner_required ? '✓' : ''}</div>
               <div className="toggle-label">Loaner Required</div>
             </div>
-
             <div
               className={`toggle-card ${formData.quote_required ? 'active' : ''}`}
               onClick={() => setFormData(prev => ({ ...prev, quote_required: !prev.quote_required }))}
@@ -541,23 +579,233 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
             </div>
           </div>
         </div>
+      </div>
+    );
+  };
 
-        {validationMessage && (
-          <div className="validation-error">
-            {validationMessage}
+  // Render Step 3: File Upload
+  const renderStep3 = () => {
+    return (
+      <div className="form-step">
+        <h2 className="step-title">Attachments</h2>
+
+        <div className="form-section">
+          <h3>Upload Supporting Documents</h3>
+          <p className="section-description">Add photos, PDFs, or other relevant files (optional)</p>
+
+          <div className="form-field">
+            <label htmlFor="file-upload" className="file-upload-label">
+              <span className="upload-icon">📎</span>
+              <span>Choose Files</span>
+            </label>
+            <input
+              id="file-upload"
+              type="file"
+              multiple
+              onChange={handleFileChange}
+              className="file-input-hidden"
+              accept=".jpg,.jpeg,.png,.pdf,.doc,.docx"
+            />
           </div>
-        )}
 
-        <div className="form-actions">
-          <button type="button" onClick={onCancel} className="btn-cancel">
-            Cancel
-          </button>
-          <button type="submit" className="btn-submit" disabled={loading}>
-            {loading ? 'Submitting...' : 'Submit Request'}
-          </button>
+          {uploadedFiles.length > 0 && (
+            <div className="uploaded-files-list">
+              <h4>Uploaded Files ({uploadedFiles.length})</h4>
+              {uploadedFiles.map((file, index) => (
+                <div key={index} className="uploaded-file-item">
+                  <div className="file-info">
+                    <span className="file-name">{file.name}</span>
+                    <span className="file-size">{(file.size / 1024).toFixed(2)} KB</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveFile(index)}
+                    className="btn-remove-file"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-      </form>
-    </div>
+      </div>
+    );
+  };
+
+  // Render Step 4: Summary & Review
+  const renderStep4 = () => {
+    return (
+      <div className="form-step">
+        <h2 className="step-title">Review & Submit</h2>
+
+        <div className="summary-section">
+          {shouldShowCustomerSearch() && formData.customer_number && (
+            <div className="summary-block">
+              <h3>Customer Information</h3>
+              <div className="summary-content">
+                <p><strong>Customer:</strong> {formData.customer_name} ({formData.customer_number})</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setCurrentStep(1)}
+                className="btn-edit-section"
+              >
+                Edit
+              </button>
+            </div>
+          )}
+
+          <div className="summary-block">
+            <h3>Item Information</h3>
+            <div className="summary-content">
+              <p><strong>Item Number:</strong> {formData.item_number}</p>
+              <p><strong>Description:</strong> {formData.item_description}</p>
+              {formData.serial_number && <p><strong>Serial Number:</strong> {formData.serial_number}</p>}
+              {formData.product_family && <p><strong>Product Family:</strong> {formData.product_family}</p>}
+            </div>
+            <button
+              type="button"
+              onClick={() => setCurrentStep(1)}
+              className="btn-edit-section"
+            >
+              Edit
+            </button>
+          </div>
+
+          <div className="summary-block">
+            <h3>Issue Type</h3>
+            <div className="summary-content">
+              <p><strong>Main Issue:</strong> {formData.main_reason}</p>
+              {formData.sub_reason && <p><strong>Sub Issue:</strong> {formData.sub_reason}</p>}
+            </div>
+            <button
+              type="button"
+              onClick={() => setCurrentStep(1)}
+              className="btn-edit-section"
+            >
+              Edit
+            </button>
+          </div>
+
+          <div className="summary-block">
+            <h3>Point of Contact</h3>
+            <div className="summary-content">
+              <p><strong>Name:</strong> {formData.contact_name}</p>
+              <p><strong>Phone:</strong> {formData.contact_phone}</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setCurrentStep(2)}
+              className="btn-edit-section"
+            >
+              Edit
+            </button>
+          </div>
+
+          <div className="summary-block">
+            <h3>Details</h3>
+            <div className="summary-content">
+              <p><strong>Urgency:</strong> {formData.urgency_level}</p>
+              <p><strong>Loaner Required:</strong> {formData.loaner_required ? 'Yes' : 'No'}</p>
+              <p><strong>Quote Required:</strong> {formData.quote_required ? 'Yes' : 'No'}</p>
+              <p><strong>Additional Comments:</strong></p>
+              <p className="summary-description">{formData.issue_description}</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setCurrentStep(2)}
+              className="btn-edit-section"
+            >
+              Edit
+            </button>
+          </div>
+
+          {uploadedFiles.length > 0 && (
+            <div className="summary-block">
+              <h3>Attachments</h3>
+              <div className="summary-content">
+                <p><strong>{uploadedFiles.length} file(s) attached</strong></p>
+                <ul className="summary-files-list">
+                  {uploadedFiles.map((file, index) => (
+                    <li key={index}>{file.name}</li>
+                  ))}
+                </ul>
+              </div>
+              <button
+                type="button"
+                onClick={() => setCurrentStep(3)}
+                className="btn-edit-section"
+              >
+                Edit
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <>
+      <LoadingModal isVisible={loading} message="Submitting request..." />
+      <div className="submit-request">
+        <div className="submit-header">
+          <div>
+            <h1>New Service Request</h1>
+            <p>Fill in the details below to create a new service request</p>
+          </div>
+          <button onClick={onCancel} className="btn-close">✕</button>
+        </div>
+
+        {/* Progress Indicator */}
+        {renderProgressIndicator()}
+
+        {/* Form Steps */}
+        <div className="form-container">
+          {currentStep === 1 && renderStep1()}
+          {currentStep === 2 && renderStep2()}
+          {currentStep === 3 && renderStep3()}
+          {currentStep === 4 && renderStep4()}
+
+          {/* Validation Message */}
+          {validationMessage && (
+            <div className="validation-error">
+              {validationMessage}
+            </div>
+          )}
+
+          {/* Navigation Buttons */}
+          <div className="form-navigation">
+            <button
+              type="button"
+              onClick={handleBack}
+              className="btn-navigation btn-back"
+              disabled={currentStep === 1}
+            >
+              ← Back
+            </button>
+
+            {currentStep < totalSteps ? (
+              <button
+                type="button"
+                onClick={handleNext}
+                className="btn-navigation btn-next"
+              >
+                Next →
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleFinalSubmit}
+                className="btn-navigation btn-submit"
+              >
+                Submit Request
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
     </>
   );
 };
