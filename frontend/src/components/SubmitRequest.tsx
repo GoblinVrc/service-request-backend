@@ -555,7 +555,7 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
               value={formData.issue_description}
               onChange={(e) => setFormData(prev => ({ ...prev, issue_description: e.target.value }))}
               placeholder="Provide detailed information about the issue..."
-              rows={6}
+              rows={4}
               className="form-input"
             />
           </div>
