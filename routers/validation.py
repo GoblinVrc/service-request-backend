@@ -188,12 +188,13 @@ def search_customers(
     """
     
     params = []
-    
-    # Territory filtering for Sales/Tech
-    if token_data.role == Roles.SALES_TECH and token_data.territories:
-        placeholders = ','.join(['%s'] * len(token_data.territories))
-        sql += f" AND c.territory_code IN ({placeholders})"
-        params.extend(token_data.territories)
+
+    # Territory filtering for Sales/Tech (not for Admin)
+    if token_data.role == Roles.SALES_TECH:
+        if token_data.territories and len(token_data.territories) > 0:
+            placeholders = ','.join(['%s'] * len(token_data.territories))
+            sql += f" AND c.territory_code IN ({placeholders})"
+            params.extend(token_data.territories)
     
     # Search query
     if query:
