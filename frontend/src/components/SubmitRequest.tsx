@@ -505,9 +505,9 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
       <div className="form-step">
         <h2 className="step-title">Additional Details</h2>
 
-        {/* Point of Contact */}
+        {/* Point of Contact & Urgency */}
         <div className="form-section">
-          <h3>Point of Contact</h3>
+          <h3>Point of Contact & Urgency</h3>
           <div className="poc-columns">
             <div className="form-field">
               <label>Name *</label>
@@ -530,6 +530,19 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
                 className="form-input"
               />
             </div>
+
+            <div className="form-field">
+              <label>Urgency Level *</label>
+              <select
+                value={formData.urgency_level}
+                onChange={(e) => setFormData(prev => ({ ...prev, urgency_level: e.target.value as any }))}
+                className="form-input"
+              >
+                <option value="Normal">Normal</option>
+                <option value="Urgent">Urgent</option>
+                <option value="Critical">Critical</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -545,22 +558,6 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
               rows={6}
               className="form-input"
             />
-          </div>
-        </div>
-
-        {/* Urgency */}
-        <div className="form-section">
-          <h3>Urgency Level</h3>
-          <div className="form-field">
-            <select
-              value={formData.urgency_level}
-              onChange={(e) => setFormData(prev => ({ ...prev, urgency_level: e.target.value as any }))}
-              className="form-input"
-            >
-              <option value="Normal">Normal</option>
-              <option value="Urgent">Urgent</option>
-              <option value="Critical">Critical</option>
-            </select>
           </div>
         </div>
 
