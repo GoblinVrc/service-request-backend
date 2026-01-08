@@ -68,20 +68,20 @@
 }
 
 .form-section {
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
   padding-bottom: 0;
   border-bottom: none;
 }
 
 .form-section:last-of-type {
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .form-section h3 {
-  font-size: 1.25rem;
+  font-size: 1.35rem;
   font-weight: 700;
   color: var(--stryker-black);
-  margin: 0 0 1rem 0;
+  margin: 0 0 1.15rem 0;
 }
 
 .form-row {
@@ -627,8 +627,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 1rem 0 1.5rem 0;
-  padding: 1.25rem 2rem;
+  margin: 1rem 0 2rem 0;
+  padding: 1.75rem 2rem;
   background: white;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
@@ -714,8 +714,8 @@
 .step-1-columns {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
-  margin-bottom: 1rem;
+  gap: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .step-1-columns .form-section {
@@ -726,7 +726,7 @@
 .poc-columns {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  gap: 1rem;
+  gap: 1.5rem;
 }
 
 @keyframes fadeInStep {
@@ -741,11 +741,11 @@
 }
 
 .step-title {
-  font-size: 1.5rem;
+  font-size: 1.65rem;
   font-weight: 700;
   color: var(--stryker-black);
-  margin: 0 0 1.25rem 0;
-  padding-bottom: 0.75rem;
+  margin: 0 0 1.5rem 0;
+  padding-bottom: 0.85rem;
   border-bottom: 3px solid var(--stryker-gold);
 }
 
@@ -914,7 +914,7 @@
 .summary-section {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1rem;
+  gap: 1.5rem;
 }
 
 .summary-block.full-width {
@@ -923,29 +923,29 @@
 
 .summary-block {
   background: white;
-  padding: 0.75rem;
+  padding: 1.25rem;
   border-radius: 10px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   position: relative;
 }
 
 .summary-block h3 {
-  font-size: 0.95rem;
+  font-size: 1.1rem;
   font-weight: 600;
   color: var(--stryker-black);
-  margin: 0 0 0.5rem 0;
-  padding-bottom: 0.4rem;
+  margin: 0 0 0.85rem 0;
+  padding-bottom: 0.6rem;
   border-bottom: 2px solid #e9ecef;
 }
 
 .summary-content {
   color: var(--stryker-dark-gray);
-  line-height: 1.3;
-  font-size: 0.85rem;
+  line-height: 1.6;
+  font-size: 0.95rem;
 }
 
 .summary-content p {
-  margin: 0.2rem 0;
+  margin: 0.4rem 0;
 }
 
 .summary-content strong {
@@ -954,8 +954,8 @@
 }
 
 .summary-description {
-  margin-top: 0.4rem;
-  padding: 0.75rem;
+  margin-top: 0.6rem;
+  padding: 1rem;
   background: #f8f9fa;
   border-radius: 6px;
   white-space: pre-wrap;
@@ -973,15 +973,15 @@
 
 .btn-edit-section {
   position: absolute;
-  top: 0.75rem;
-  right: 0.75rem;
-  padding: 0.3rem 0.6rem;
+  top: 1.25rem;
+  right: 1.25rem;
+  padding: 0.4rem 0.85rem;
   background: transparent;
-  border: 1.5px solid var(--stryker-gold);
-  border-radius: 5px;
+  border: 2px solid var(--stryker-gold);
+  border-radius: 6px;
   color: var(--stryker-gold);
   font-weight: 500;
-  font-size: 0.7rem;
+  font-size: 0.8rem;
   cursor: pointer;
   transition: all 0.3s ease;
 }
