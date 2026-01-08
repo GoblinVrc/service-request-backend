@@ -41,14 +41,16 @@ const Dashboard: React.FC<DashboardProps> = ({ onTicketClick, filters }) => {
           };
 
           return {
-            id: req.RequestCode,
-            subject: req.ItemDescription || req.MainReason || 'Service Request',
-            status: req.Status === 'Submitted' ? 'Open' : req.Status as any,
-            date: new Date(req.SubmittedDate).toISOString().split('T')[0],
-            assignee: req.Territory || 'Unassigned',
-            priority: priorityMap[req.UrgencyLevel] || 'Normal',
-            category: req.MainReason,
-            location: req.SiteAddress || req.CountryCode,
+            id: req.request_code,
+            subject: req.item_description || req.main_reason || 'Service Request',
+            status: req.status === 'Submitted' ? 'Open' : req.status as any,
+            date: req.submitted_date && !isNaN(new Date(req.submitted_date).getTime())
+              ? new Date(req.submitted_date).toISOString().split('T')[0]
+              : 'N/A',
+            assignee: req.territory || 'Unassigned',
+            priority: priorityMap[req.urgency_level] || 'Normal',
+            category: req.main_reason,
+            location: req.site_address || req.country_code,
           };
         });
 
