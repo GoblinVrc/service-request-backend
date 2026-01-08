@@ -13,9 +13,9 @@ class LoginRequest(BaseModel):
 class LoginResponse(BaseModel):
     email: str
     name: str
-    customer_number: str
+    customer_number: Optional[str] = None
     role: str
-    customer_name: str
+    customer_name: Optional[str] = None
     territories: Optional[List[str]] = None
 
 @router.post("/login", response_model=LoginResponse)
@@ -37,7 +37,7 @@ def login(credentials: LoginRequest):
             cu.role,
             c.customer_name
         FROM regops_app.tbl_globi_eu_am_99_customer_users cu
-        JOIN regops_app.tbl_globi_eu_am_99_customers c
+        LEFT JOIN regops_app.tbl_globi_eu_am_99_customers c
             ON cu.customer_number = c.customer_number
         WHERE cu.email = %s
     """
