@@ -336,11 +336,22 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
       { number: 4, label: 'Review' },
     ];
 
+    const handleStepClick = (stepNumber: number) => {
+      // Only allow navigation to previous steps or current step
+      if (stepNumber <= currentStep) {
+        setCurrentStep(stepNumber);
+        setValidationMessage('');
+      }
+    };
+
     return (
       <div className="progress-indicator">
         {steps.map((step, index) => (
           <React.Fragment key={step.number}>
-            <div className={`progress-step ${currentStep >= step.number ? 'active' : ''} ${currentStep === step.number ? 'current' : ''}`}>
+            <div
+              className={`progress-step ${currentStep >= step.number ? 'active' : ''} ${currentStep === step.number ? 'current' : ''} ${step.number <= currentStep ? 'clickable' : ''}`}
+              onClick={() => handleStepClick(step.number)}
+            >
               <div className="step-number">{step.number}</div>
               <div className="step-label">{step.label}</div>
             </div>
