@@ -74,17 +74,16 @@ def login(credentials: LoginRequest):
     """
     execute_query(update_query, (datetime.now(), credentials.email), fetch=False)
 
-    # For SalesTech users, get their territories
+    # Get user territories (all users have territories now)
     territories = None
-    if user.get('role') == 'SalesTech':
-        territory_query = """
-            SELECT DISTINCT territory
-            FROM regops_app.tbl_globi_eu_am_99_salestech_territories
-            WHERE email = %s
-        """
-        territory_result = execute_query(territory_query, (user['email'],))
-        if territory_result:
-            territories = [row['territory'] for row in territory_result]
+    territory_query = """
+        SELECT territory_code
+        FROM regops_app.tbl_globi_eu_am_99_user_territories
+        WHERE user_email = %s
+    """
+    territory_result = execute_query(territory_query, (user['email'],))
+    if territory_result:
+        territories = [row['territory_code'] for row in territory_result]
 
     # Return user data
     full_name = f"{user['first_name']} {user['last_name']}".strip()

@@ -57,7 +57,7 @@ export interface ServiceRequest {
   contact_phone: string;
   contact_name: string;
   country_code: string;
-  territory?: string;
+  territory_code?: string;
   site_address?: string;
   serial_number?: string;
   item_number?: string;

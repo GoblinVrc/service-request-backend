@@ -47,7 +47,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onTicketClick, filters }) => {
             date: req.submitted_date && !isNaN(new Date(req.submitted_date).getTime())
               ? new Date(req.submitted_date).toISOString().split('T')[0]
               : 'N/A',
-            assignee: req.territory || 'Unassigned',
+            assignee: req.territory_code || 'Unassigned',
             priority: priorityMap[req.urgency_level] || 'Normal',
             category: req.main_reason,
             location: req.site_address || req.country_code,
