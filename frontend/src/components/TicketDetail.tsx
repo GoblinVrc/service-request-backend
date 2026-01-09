@@ -169,26 +169,23 @@ const TicketDetail: React.FC<TicketDetailProps> = ({ ticketId, onClose }) => {
               </span>
             </div>
           </div>
-          <div className="header-right-section">
-            <div className="header-requirements">
-              <div className="header-requirement-item">
-                <div className="requirement-label">Quote Required</div>
-                {ticket.quoteRequired ? (
-                  <span className="requirement-badge requirement-yes">💰 Yes</span>
-                ) : (
-                  <span className="requirement-badge requirement-no">No</span>
-                )}
-              </div>
-              <div className="header-requirement-item">
-                <div className="requirement-label">Loaner Required</div>
-                {ticket.loanerRequired ? (
-                  <span className="requirement-badge requirement-yes">📦 Yes</span>
-                ) : (
-                  <span className="requirement-badge requirement-no">No</span>
-                )}
-              </div>
+          <div className="header-requirements">
+            <div className="header-requirement-item">
+              <div className="requirement-label">Quote Required</div>
+              {ticket.quoteRequired ? (
+                <span className="requirement-badge requirement-yes">💰 Yes</span>
+              ) : (
+                <span className="requirement-badge requirement-no">No</span>
+              )}
             </div>
-            <button onClick={onClose} className="btn-close-detail">✕</button>
+            <div className="header-requirement-item">
+              <div className="requirement-label">Loaner Required</div>
+              {ticket.loanerRequired ? (
+                <span className="requirement-badge requirement-yes">📦 Yes</span>
+              ) : (
+                <span className="requirement-badge requirement-no">No</span>
+              )}
+            </div>
           </div>
         </div>
 

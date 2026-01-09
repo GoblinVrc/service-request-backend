@@ -175,7 +175,7 @@ def get_request_detail(
             raise HTTPException(403, "Access denied")
 
     elif token_data.role == Roles.SALES_TECH:
-        if request['territory'] not in (token_data.territories or []):
+        if request['territory_code'] not in (token_data.territories or []):
             raise HTTPException(403, "Access denied")
 
     # Get attachments
@@ -204,7 +204,7 @@ def update_request_status(
     # RBAC for SalesTech
     if token_data.role == Roles.SALES_TECH:
         check_query = """
-            SELECT territory
+            SELECT territory_code
             FROM regops_app.tbl_globi_eu_am_99_service_requests
             WHERE id = %s
         """
@@ -213,7 +213,7 @@ def update_request_status(
         if not result:
             raise HTTPException(404, "Request not found")
 
-        if result[0]['territory'] not in (token_data.territories or []):
+        if result[0]['territory_code'] not in (token_data.territories or []):
             raise HTTPException(403, "Access denied")
 
     # Update

@@ -36,12 +36,6 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
-.header-right-section {
-  display: flex;
-  gap: 1rem;
-  align-items: stretch;
-}
-
 .header-requirements {
   display: flex;
   flex-direction: column;
