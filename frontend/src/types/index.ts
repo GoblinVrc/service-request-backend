@@ -94,6 +94,7 @@ export interface ServiceRequestCreate {
   // Customer Information
   customer_number?: string;
   customer_name?: string;
+  territory_code?: string;
   site_address?: string;
 
   // Ship-To Address (4 fields)
