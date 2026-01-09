@@ -22,10 +22,10 @@ const IntakeForm: React.FC = () => {
   const [validationMessage, setValidationMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  // Form data (UR-037: Mandatory and optional fields)
+  // Form data - New structure per UR-1121517
   const [formData, setFormData] = useState<Partial<ServiceRequestCreate>>({
-    request_type: 'Serial', // Default to Serial (primary input - UR-034)
-    country_code: '',
+    request_type: 'Serial', // Default to Serial (primary input)
+    country_code: 'US', // Default country (will be set by sidebar later)
     language_code: 'en',
     contact_email: '',
     contact_name: '',
@@ -34,6 +34,11 @@ const IntakeForm: React.FC = () => {
     urgency_level: 'Normal',
     loaner_required: false,
     quote_required: false,
+    safety_patient_involved: false,
+    pickup_date: '',
+    pickup_time: '',
+    po_reference_number: '',
+    customer_ident_code: '',
   });
 
   // Auto-filled data from validation (UR-038)
@@ -150,29 +155,40 @@ const IntakeForm: React.FC = () => {
   const validateStep = (step: number): boolean => {
     switch (step) {
       case 1:
-        // Country and language selection
-        return !!(formData.country_code && formData.language_code);
-      case 2:
-        // Request type and item identification
+        // Step 1: Item Identification
         if (formData.request_type === 'Serial') {
           return !!formData.serial_number;
         } else if (formData.request_type === 'Item') {
           return !!formData.item_number;
         } else if (formData.request_type === 'General') {
-          // General requests require manual entry (UR-039)
           return !!(formData.item_description && formData.customer_name);
         }
         return false;
+      case 2:
+        // Step 2: Issue Details (Main Reason and Safety/Patient are mandatory)
+        return !!(formData.main_reason);
       case 3:
-        // Contact information (UR-037: Mandatory fields)
+        // Step 3: Contact & Addresses (Contact info is mandatory)
         return !!(
           formData.contact_email &&
           formData.contact_name &&
           formData.contact_phone
         );
       case 4:
-        // Issue description (UR-040)
-        return !!formData.main_reason;
+        // Step 4: Service Requirements (Loaner, Pickup Date/Time, PO Reference, Customer Ident Code are mandatory)
+        return !!(
+          formData.loaner_required !== undefined &&
+          formData.pickup_date &&
+          formData.pickup_time &&
+          formData.po_reference_number &&
+          formData.customer_ident_code
+        );
+      case 5:
+        // Step 5: Attachments (optional)
+        return true;
+      case 6:
+        // Step 6: Review & Submit
+        return true;
       default:
         return true;
     }
@@ -240,9 +256,9 @@ const IntakeForm: React.FC = () => {
         <h1>Service Request Intake Form</h1>
         <p className="form-subtitle">ProCare Service Request</p>
 
-        {/* Progress Steps (UR-048) */}
+        {/* Progress Steps - 6 Steps per UR-1121517 */}
         <div className="steps-indicator">
-          {[1, 2, 3, 4, 5].map((step) => (
+          {[1, 2, 3, 4, 5, 6].map((step) => (
             <div
               key={step}
               className={`step ${
@@ -255,63 +271,20 @@ const IntakeForm: React.FC = () => {
             >
               <div className="step-number">{step}</div>
               <div className="step-label">
-                {step === 1 && 'Country & Language'}
-                {step === 2 && 'Item Identification'}
-                {step === 3 && 'Contact Information'}
-                {step === 4 && 'Issue Description'}
-                {step === 5 && 'Review & Submit'}
+                {step === 1 && 'Item Identification'}
+                {step === 2 && 'Issue Details'}
+                {step === 3 && 'Contact & Addresses'}
+                {step === 4 && 'Service Requirements'}
+                {step === 5 && 'Attachments'}
+                {step === 6 && 'Review & Submit'}
               </div>
             </div>
           ))}
         </div>
 
         <div className="form-content">
-          {/* Step 1: Country & Language Selection (UR-029, UR-030) */}
+          {/* Step 1: Item Identification */}
           {currentStep === 1 && (
-            <div className="form-step">
-              <h2>Select Country and Language</h2>
-
-              <div className="form-group">
-                <label>Country *</label>
-                <select
-                  value={formData.country_code}
-                  onChange={(e) =>
-                    handleInputChange('country_code', e.target.value)
-                  }
-                  className="form-control"
-                >
-                  <option value="">-- Select Country --</option>
-                  {countries.map((country) => (
-                    <option key={country.country_code} value={country.country_code}>
-                      {country.country_name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label>Language *</label>
-                <select
-                  value={formData.language_code}
-                  onChange={(e) =>
-                    handleInputChange('language_code', e.target.value)
-                  }
-                  className="form-control"
-                  disabled={!formData.country_code}
-                >
-                  <option value="">-- Select Language --</option>
-                  {languages.map((lang) => (
-                    <option key={lang.language_code} value={lang.language_code}>
-                      {lang.language_name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          )}
-
-          {/* Step 2: Item Identification (UR-034, UR-036) */}
-          {currentStep === 2 && (
             <div className="form-step">
               <h2>Item Identification</h2>
 
@@ -442,69 +415,10 @@ const IntakeForm: React.FC = () => {
             </div>
           )}
 
-          {/* Step 3: Contact Information (UR-037) */}
-          {currentStep === 3 && (
+          {/* Step 2: Issue Details */}
+          {currentStep === 2 && (
             <div className="form-step">
-              <h2>Contact Information</h2>
-
-              <div className="form-group">
-                <label>Contact Name *</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  value={formData.contact_name || ''}
-                  onChange={(e) =>
-                    handleInputChange('contact_name', e.target.value)
-                  }
-                  placeholder="Full name"
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Contact Email *</label>
-                <input
-                  type="email"
-                  className="form-control"
-                  value={formData.contact_email || ''}
-                  onChange={(e) =>
-                    handleInputChange('contact_email', e.target.value)
-                  }
-                  placeholder="email@example.com"
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Contact Phone *</label>
-                <input
-                  type="tel"
-                  className="form-control"
-                  value={formData.contact_phone || ''}
-                  onChange={(e) =>
-                    handleInputChange('contact_phone', e.target.value)
-                  }
-                  placeholder="+1 (555) 123-4567"
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Site Address</label>
-                <textarea
-                  className="form-control"
-                  value={formData.site_address || ''}
-                  onChange={(e) =>
-                    handleInputChange('site_address', e.target.value)
-                  }
-                  placeholder="Full address"
-                  rows={3}
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Step 4: Issue Description (UR-040) */}
-          {currentStep === 4 && (
-            <div className="form-step">
-              <h2>Issue Description</h2>
+              <h2>Issue Details</h2>
 
               <div className="form-group">
                 <label>Main Reason *</label>
@@ -558,6 +472,47 @@ const IntakeForm: React.FC = () => {
               </div>
 
               <div className="form-group">
+                <label>Safety / Patient Involvement *</label>
+                <div className="radio-group">
+                  <label className="radio-label">
+                    <input
+                      type="radio"
+                      checked={formData.safety_patient_involved === true}
+                      onChange={() =>
+                        handleInputChange('safety_patient_involved', true)
+                      }
+                    />
+                    Yes - Patient/Safety Issue
+                  </label>
+                  <label className="radio-label">
+                    <input
+                      type="radio"
+                      checked={formData.safety_patient_involved === false}
+                      onChange={() =>
+                        handleInputChange('safety_patient_involved', false)
+                      }
+                    />
+                    No - No Patient/Safety Involvement
+                  </label>
+                </div>
+              </div>
+
+              {formData.safety_patient_involved && (
+                <div className="form-group">
+                  <label>Safety / Patient Details *</label>
+                  <textarea
+                    className="form-control"
+                    value={formData.safety_patient_details || ''}
+                    onChange={(e) =>
+                      handleInputChange('safety_patient_details', e.target.value)
+                    }
+                    placeholder="Please provide details about the patient/safety involvement..."
+                    rows={3}
+                  />
+                </div>
+              )}
+
+              <div className="form-group">
                 <label>Urgency Level</label>
                 <select
                   className="form-control"
@@ -571,18 +526,71 @@ const IntakeForm: React.FC = () => {
                   <option value="Critical">Critical</option>
                 </select>
               </div>
+            </div>
+          )}
 
-              {/* Ship-To Address Section */}
+          {/* Step 3: Contact & Addresses */}
+          {currentStep === 3 && (
+            <div className="form-step">
+              <h2>Contact Information & Addresses</h2>
+
+              <h3 style={{ marginTop: '1.5rem', marginBottom: '1rem' }}>Contact Details</h3>
+
+              <div className="form-group">
+                <label>Contact Name *</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={formData.contact_name || ''}
+                  onChange={(e) =>
+                    handleInputChange('contact_name', e.target.value)
+                  }
+                  placeholder="Full name"
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Contact Email *</label>
+                <input
+                  type="email"
+                  className="form-control"
+                  value={formData.contact_email || ''}
+                  onChange={(e) =>
+                    handleInputChange('contact_email', e.target.value)
+                  }
+                  placeholder="email@example.com"
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Contact Phone *</label>
+                <input
+                  type="tel"
+                  className="form-control"
+                  value={formData.contact_phone || ''}
+                  onChange={(e) =>
+                    handleInputChange('contact_phone', e.target.value)
+                  }
+                  placeholder="+1 (555) 123-4567"
+                />
+              </div>
+
+              <h3 style={{ marginTop: '2rem', marginBottom: '1rem' }}>Addresses</h3>
+
+              <div className="form-group">
+                <label>Bill-To Address (from Customer Record)</label>
+                <div className="address-display-section">
+                  <div className="current-address">
+                    <p>{formData.site_address || 'No billing address on file'}</p>
+                  </div>
+                </div>
+              </div>
+
               <div className="form-group">
                 <label>Ship-To Address</label>
                 <div className="address-display-section">
-                  <div className="current-address">
-                    <strong>Current Address:</strong>
-                    <p>{formData.site_address || 'No address on file'}</p>
-                  </div>
-                  {formData.ship_to_street && (
+                  {formData.ship_to_street ? (
                     <div className="ship-to-address">
-                      <strong>Ship-To Address (Updated):</strong>
                       <p>
                         {formData.ship_to_street}
                         {formData.ship_to_zip && `, ${formData.ship_to_zip}`}
@@ -590,6 +598,8 @@ const IntakeForm: React.FC = () => {
                         {formData.ship_to_country && `, ${formData.ship_to_country}`}
                       </p>
                     </div>
+                  ) : (
+                    <p>Using Bill-To address</p>
                   )}
                   <button
                     type="button"
@@ -605,14 +615,118 @@ const IntakeForm: React.FC = () => {
                 <label className="checkbox-label">
                   <input
                     type="checkbox"
-                    checked={formData.loaner_required || false}
-                    onChange={(e) =>
-                      handleInputChange('loaner_required', e.target.checked)
-                    }
+                    checked={!!formData.alternative_billing_street}
+                    onChange={(e) => {
+                      if (!e.target.checked) {
+                        // Clear alternative billing fields
+                        setFormData({
+                          ...formData,
+                          alternative_billing_street: undefined,
+                          alternative_billing_zip: undefined,
+                          alternative_billing_city: undefined,
+                          alternative_billing_country: undefined,
+                        });
+                      }
+                    }}
                   />
-                  Loaner Equipment Required
+                  Use Alternative Billing Address (Optional)
                 </label>
               </div>
+
+              {formData.alternative_billing_street !== undefined && (
+                <div className="form-group" style={{ marginLeft: '1.5rem' }}>
+                  <label>Alternative Billing Street</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={formData.alternative_billing_street || ''}
+                    onChange={(e) =>
+                      handleInputChange('alternative_billing_street', e.target.value)
+                    }
+                    placeholder="Street address"
+                  />
+                  <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}>
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={formData.alternative_billing_zip || ''}
+                      onChange={(e) =>
+                        handleInputChange('alternative_billing_zip', e.target.value)
+                      }
+                      placeholder="Zip"
+                      style={{ flex: 1 }}
+                    />
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={formData.alternative_billing_city || ''}
+                      onChange={(e) =>
+                        handleInputChange('alternative_billing_city', e.target.value)
+                      }
+                      placeholder="City"
+                      style={{ flex: 2 }}
+                    />
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={formData.alternative_billing_country || ''}
+                      onChange={(e) =>
+                        handleInputChange('alternative_billing_country', e.target.value)
+                      }
+                      placeholder="Country"
+                      style={{ flex: 1 }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Step 4: Service Requirements */}
+          {currentStep === 4 && (
+            <div className="form-step">
+              <h2>Service Requirements</h2>
+
+              <div className="form-group">
+                <label>Loaner Equipment Required? *</label>
+                <div className="radio-group">
+                  <label className="radio-label">
+                    <input
+                      type="radio"
+                      checked={formData.loaner_required === true}
+                      onChange={() =>
+                        handleInputChange('loaner_required', true)
+                      }
+                    />
+                    Yes - Loaner Required
+                  </label>
+                  <label className="radio-label">
+                    <input
+                      type="radio"
+                      checked={formData.loaner_required === false}
+                      onChange={() =>
+                        handleInputChange('loaner_required', false)
+                      }
+                    />
+                    No - Loaner Not Required
+                  </label>
+                </div>
+              </div>
+
+              {formData.loaner_required && (
+                <div className="form-group">
+                  <label>Loaner Details</label>
+                  <textarea
+                    className="form-control"
+                    value={formData.loaner_details || ''}
+                    onChange={(e) =>
+                      handleInputChange('loaner_details', e.target.value)
+                    }
+                    placeholder="Specify loaner requirements..."
+                    rows={2}
+                  />
+                </div>
+              )}
 
               <div className="form-group">
                 <label className="checkbox-label">
@@ -626,40 +740,193 @@ const IntakeForm: React.FC = () => {
                   Quote Required
                 </label>
               </div>
+
+              <h3 style={{ marginTop: '2rem', marginBottom: '1rem' }}>Pickup Information</h3>
+
+              <div className="form-group">
+                <label>Pickup Date *</label>
+                <input
+                  type="date"
+                  className="form-control"
+                  value={formData.pickup_date || ''}
+                  onChange={(e) =>
+                    handleInputChange('pickup_date', e.target.value)
+                  }
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Pickup Time *</label>
+                <input
+                  type="time"
+                  className="form-control"
+                  value={formData.pickup_time || ''}
+                  onChange={(e) =>
+                    handleInputChange('pickup_time', e.target.value)
+                  }
+                />
+              </div>
+
+              <h3 style={{ marginTop: '2rem', marginBottom: '1rem' }}>Reference Information</h3>
+
+              <div className="form-group">
+                <label>PO Reference Number *</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={formData.po_reference_number || ''}
+                  onChange={(e) =>
+                    handleInputChange('po_reference_number', e.target.value)
+                  }
+                  placeholder="Purchase Order number"
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Customer Ident Code *</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={formData.customer_ident_code || ''}
+                  onChange={(e) =>
+                    handleInputChange('customer_ident_code', e.target.value)
+                  }
+                  placeholder="Customer identification code"
+                />
+              </div>
+
+              <h3 style={{ marginTop: '2rem', marginBottom: '1rem' }}>Additional Information</h3>
+
+              <div className="form-group">
+                <label>Preferred Contact Method</label>
+                <select
+                  className="form-control"
+                  value={formData.preferred_contact_method || ''}
+                  onChange={(e) =>
+                    handleInputChange('preferred_contact_method', e.target.value)
+                  }
+                >
+                  <option value="">-- Select Method --</option>
+                  <option value="Email">Email</option>
+                  <option value="Phone">Phone</option>
+                  <option value="SMS">SMS</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label>Contract Information</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={formData.contract_info || ''}
+                  onChange={(e) =>
+                    handleInputChange('contract_info', e.target.value)
+                  }
+                  placeholder="Contract number or details"
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Additional Comments</label>
+                <textarea
+                  className="form-control"
+                  value={formData.customer_notes || ''}
+                  onChange={(e) =>
+                    handleInputChange('customer_notes', e.target.value)
+                  }
+                  placeholder="Any additional information..."
+                  rows={3}
+                />
+              </div>
             </div>
           )}
 
-          {/* Step 5: Review & Submit */}
+          {/* Step 5: Attachments */}
           {currentStep === 5 && (
+            <div className="form-step">
+              <h2>Attachments (Optional)</h2>
+              <p className="form-subtitle">Upload photos, documents, or other files related to your request</p>
+
+              <div className="form-group">
+                <label>File Upload</label>
+                <input
+                  type="file"
+                  className="form-control"
+                  multiple
+                  accept="image/*,.pdf,.doc,.docx"
+                />
+                <p style={{ fontSize: '0.875rem', color: '#666', marginTop: '0.5rem' }}>
+                  Accepted formats: Images, PDF, Word documents. Max 10MB per file.
+                </p>
+              </div>
+
+              <div className="form-group">
+                <p style={{ fontStyle: 'italic', color: '#666' }}>
+                  Note: File upload functionality will be fully implemented in the next phase.
+                  You can skip this step for now.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Step 6: Review & Submit */}
+          {currentStep === 6 && (
             <div className="form-step">
               <h2>Review Your Request</h2>
 
               <div className="review-section">
-                <h4>Country & Language</h4>
-                <p>Country: {formData.country_code}</p>
-                <p>Language: {formData.language_code}</p>
-              </div>
-
-              <div className="review-section">
                 <h4>Item Information</h4>
-                <p>Request Type: {formData.request_type}</p>
-                {formData.serial_number && <p>Serial: {formData.serial_number}</p>}
-                {formData.item_number && <p>Item: {formData.item_number}</p>}
-                {formData.item_description && <p>Description: {formData.item_description}</p>}
+                <p><strong>Request Type:</strong> {formData.request_type}</p>
+                {formData.serial_number && <p><strong>Serial Number:</strong> {formData.serial_number}</p>}
+                {formData.item_number && <p><strong>Item Number:</strong> {formData.item_number}</p>}
+                {formData.item_description && <p><strong>Description:</strong> {formData.item_description}</p>}
+                {formData.customer_name && <p><strong>Customer:</strong> {formData.customer_name}</p>}
               </div>
 
               <div className="review-section">
-                <h4>Contact</h4>
-                <p>Name: {formData.contact_name}</p>
-                <p>Email: {formData.contact_email}</p>
-                <p>Phone: {formData.contact_phone}</p>
+                <h4>Issue Details</h4>
+                <p><strong>Main Reason:</strong> {formData.main_reason}</p>
+                {formData.sub_reason && <p><strong>Sub Reason:</strong> {formData.sub_reason}</p>}
+                {formData.issue_description && <p><strong>Details:</strong> {formData.issue_description}</p>}
+                <p><strong>Safety/Patient Involved:</strong> {formData.safety_patient_involved ? 'Yes' : 'No'}</p>
+                {formData.safety_patient_details && <p><strong>Safety Details:</strong> {formData.safety_patient_details}</p>}
+                <p><strong>Urgency:</strong> {formData.urgency_level}</p>
               </div>
 
               <div className="review-section">
-                <h4>Issue</h4>
-                <p>Main Reason: {formData.main_reason}</p>
-                {formData.sub_reason && <p>Sub Reason: {formData.sub_reason}</p>}
-                {formData.issue_description && <p>Details: {formData.issue_description}</p>}
+                <h4>Contact Information</h4>
+                <p><strong>Name:</strong> {formData.contact_name}</p>
+                <p><strong>Email:</strong> {formData.contact_email}</p>
+                <p><strong>Phone:</strong> {formData.contact_phone}</p>
+                {formData.preferred_contact_method && (
+                  <p><strong>Preferred Contact:</strong> {formData.preferred_contact_method}</p>
+                )}
+              </div>
+
+              <div className="review-section">
+                <h4>Addresses</h4>
+                <p><strong>Bill-To:</strong> {formData.site_address || 'Not specified'}</p>
+                {formData.ship_to_street ? (
+                  <p><strong>Ship-To:</strong> {formData.ship_to_street}, {formData.ship_to_zip} {formData.ship_to_city}, {formData.ship_to_country}</p>
+                ) : (
+                  <p><strong>Ship-To:</strong> Same as Bill-To</p>
+                )}
+                {formData.alternative_billing_street && (
+                  <p><strong>Alt. Billing:</strong> {formData.alternative_billing_street}, {formData.alternative_billing_zip} {formData.alternative_billing_city}, {formData.alternative_billing_country}</p>
+                )}
+              </div>
+
+              <div className="review-section">
+                <h4>Service Requirements</h4>
+                <p><strong>Loaner Required:</strong> {formData.loaner_required ? 'Yes' : 'No'}</p>
+                {formData.loaner_details && <p><strong>Loaner Details:</strong> {formData.loaner_details}</p>}
+                <p><strong>Quote Required:</strong> {formData.quote_required ? 'Yes' : 'No'}</p>
+                <p><strong>Pickup Date:</strong> {formData.pickup_date}</p>
+                <p><strong>Pickup Time:</strong> {formData.pickup_time}</p>
+                <p><strong>PO Reference:</strong> {formData.po_reference_number}</p>
+                <p><strong>Customer Ident Code:</strong> {formData.customer_ident_code}</p>
+                {formData.contract_info && <p><strong>Contract Info:</strong> {formData.contract_info}</p>}
+                {formData.customer_notes && <p><strong>Comments:</strong> {formData.customer_notes}</p>}
               </div>
             </div>
           )}
@@ -682,7 +949,7 @@ const IntakeForm: React.FC = () => {
               </button>
             )}
 
-            {currentStep < 5 ? (
+            {currentStep < 6 ? (
               <button
                 type="button"
                 className="btn-primary"
