@@ -28,12 +28,41 @@
 .detail-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: stretch;
   margin-bottom: 2rem;
   background: var(--stryker-white);
   padding: 2rem;
   border-radius: 16px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.header-right-section {
+  display: flex;
+  gap: 1rem;
+  align-items: stretch;
+}
+
+.header-requirements {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1rem;
+  min-width: 180px;
+}
+
+.header-requirement-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.requirement-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--stryker-dark-gray);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .ticket-id-large {
@@ -159,32 +188,10 @@
   border-bottom: 1px solid #e9ecef;
 }
 
-/* Requirements Row - Centered */
-.status-priority-row.requirements-row {
-  grid-template-columns: auto auto;
-  justify-content: center;
-  gap: 2rem;
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
 .info-item-half {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-}
-
-.info-item-half.align-right {
-  align-items: flex-end;
-}
-
-.info-item-half.align-right .info-label {
-  text-align: right;
-}
-
-.info-item-half.align-right .info-value {
-  text-align: right;
 }
 
 /* Standard Info Grid */

@@ -169,7 +169,27 @@ const TicketDetail: React.FC<TicketDetailProps> = ({ ticketId, onClose }) => {
               </span>
             </div>
           </div>
-          <button onClick={onClose} className="btn-close-detail">✕</button>
+          <div className="header-right-section">
+            <div className="header-requirements">
+              <div className="header-requirement-item">
+                <div className="requirement-label">Quote Required</div>
+                {ticket.quoteRequired ? (
+                  <span className="requirement-badge requirement-yes">💰 Yes</span>
+                ) : (
+                  <span className="requirement-badge requirement-no">No</span>
+                )}
+              </div>
+              <div className="header-requirement-item">
+                <div className="requirement-label">Loaner Required</div>
+                {ticket.loanerRequired ? (
+                  <span className="requirement-badge requirement-yes">📦 Yes</span>
+                ) : (
+                  <span className="requirement-badge requirement-no">No</span>
+                )}
+              </div>
+            </div>
+            <button onClick={onClose} className="btn-close-detail">✕</button>
+          </div>
         </div>
 
         <div className="detail-tabs">
@@ -218,30 +238,6 @@ const TicketDetail: React.FC<TicketDetailProps> = ({ ticketId, onClose }) => {
                   <span className={`priority-badge ${getPriorityColor(ticket.priority)}`}>
                     {ticket.priority}
                   </span>
-                </div>
-              </div>
-
-              {/* Loaner & Quote Requirements - Centered */}
-              <div className="status-priority-row requirements-row">
-                <div className="info-item-half">
-                  <div className="info-label">Quote Required</div>
-                  <div className="info-value">
-                    {ticket.quoteRequired ? (
-                      <span className="requirement-badge requirement-yes">💰 Yes</span>
-                    ) : (
-                      <span className="requirement-badge requirement-no">No</span>
-                    )}
-                  </div>
-                </div>
-                <div className="info-item-half align-right">
-                  <div className="info-label">Loaner Required</div>
-                  <div className="info-value">
-                    {ticket.loanerRequired ? (
-                      <span className="requirement-badge requirement-yes">📦 Yes</span>
-                    ) : (
-                      <span className="requirement-badge requirement-no">No</span>
-                    )}
-                  </div>
                 </div>
               </div>
 
