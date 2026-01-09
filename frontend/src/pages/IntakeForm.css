@@ -544,3 +544,56 @@ textarea.form-control {
   color: var(--stryker-black);
   font-weight: 600;
 }
+
+/* Toggle Cards for Yes/No choices */
+.toggle-cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.toggle-card {
+  border: 2px solid #dee2e6;
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: #fff;
+}
+
+.toggle-card:hover {
+  border-color: var(--stryker-gold);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.toggle-card.selected {
+  border-color: var(--stryker-gold);
+  background: #fff8e1;
+  box-shadow: 0 4px 12px rgba(255, 181, 0, 0.2);
+}
+
+.toggle-card-icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.toggle-card-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--stryker-black);
+  margin-bottom: 0.25rem;
+}
+
+.toggle-card-desc {
+  font-size: 0.875rem;
+  color: var(--stryker-dark-gray);
+}
+
+@media (max-width: 768px) {
+  .toggle-cards {
+    grid-template-columns: 1fr;
+  }
+}

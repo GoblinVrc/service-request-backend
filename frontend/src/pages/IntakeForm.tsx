@@ -39,6 +39,7 @@ const IntakeForm: React.FC<IntakeFormProps> = ({ onSubmit: onSubmitCallback, onC
   const [issueReasons, setIssueReasons] = useState<Record<string, string[]>>({});
   const [validationMessage, setValidationMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [userRole, setUserRole] = useState<string>('customer');
 
   // Form data - New structure per UR-1121517
   const [formData, setFormData] = useState<Partial<ServiceRequestCreate>>({
@@ -77,6 +78,16 @@ const IntakeForm: React.FC<IntakeFormProps> = ({ onSubmit: onSubmitCallback, onC
 
   useEffect(() => {
     loadInitialData();
+    // Detect user role from localStorage
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        setUserRole(user.role || 'customer');
+      } catch (e) {
+        setUserRole('customer');
+      }
+    }
   }, []);
 
   useEffect(() => {
@@ -261,6 +272,11 @@ const IntakeForm: React.FC<IntakeFormProps> = ({ onSubmit: onSubmitCallback, onC
     switch (step) {
       case 1:
         // Step 1: Item Identification
+        // Sales/tech/admin must select a customer first
+        if (userRole !== 'customer' && !formData.customer_number) {
+          return false;
+        }
+
         if (formData.request_type === 'Serial') {
           return !!formData.serial_number;
         } else if (formData.request_type === 'Item') {
@@ -396,6 +412,53 @@ const IntakeForm: React.FC<IntakeFormProps> = ({ onSubmit: onSubmitCallback, onC
           {currentStep === 1 && (
             <div className="form-step">
               <h2>Item Identification</h2>
+
+              {/* Customer search for sales/tech/admin users */}
+              {userRole !== 'customer' && (
+                <div className="form-group">
+                  <label>Search Customer *</label>
+                  <div className="autocomplete-wrapper">
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={customerSearchTerm}
+                      onChange={(e) => handleCustomerSearch(e.target.value)}
+                      onFocus={() => filteredCustomers.length > 0 && setShowCustomerDropdown(true)}
+                      placeholder="Type to search by customer name or number..."
+                    />
+
+                    {showCustomerDropdown && filteredCustomers.length > 0 && (
+                      <div className="autocomplete-results">
+                        {filteredCustomers.map((customer, index) => (
+                          <div
+                            key={index}
+                            className="autocomplete-result-item"
+                            onClick={() => handleSelectCustomer(customer)}
+                          >
+                            <div className="item-info">
+                              <span className="item-badge">Customer: {customer.customer_number}</span>
+                              <span className="item-badge">Territory: {customer.territory_code}</span>
+                            </div>
+                            <div className="item-desc">{customer.customer_name}</div>
+                            <div className="item-family">Country: {customer.country_code}</div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {formData.customer_name && (
+                    <div className="selected-item">
+                      <h4>✓ Selected Customer</h4>
+                      <div className="item-details">
+                        <p><strong>Customer Number:</strong> {formData.customer_number}</p>
+                        <p><strong>Customer Name:</strong> {formData.customer_name}</p>
+                        <p><strong>Country:</strong> {formData.country_code}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
 
               <div className="form-group">
                 <label>Request Type *</label>
@@ -829,56 +892,46 @@ const IntakeForm: React.FC<IntakeFormProps> = ({ onSubmit: onSubmitCallback, onC
 
               <div className="form-group">
                 <label>Loaner Equipment Required? *</label>
-                <div className="radio-group">
-                  <label className="radio-label">
-                    <input
-                      type="radio"
-                      checked={formData.loaner_required === true}
-                      onChange={() =>
-                        handleInputChange('loaner_required', true)
-                      }
-                    />
-                    Yes - Loaner Required
-                  </label>
-                  <label className="radio-label">
-                    <input
-                      type="radio"
-                      checked={formData.loaner_required === false}
-                      onChange={() =>
-                        handleInputChange('loaner_required', false)
-                      }
-                    />
-                    No - Loaner Not Required
-                  </label>
+                <div className="toggle-cards">
+                  <div
+                    className={`toggle-card ${formData.loaner_required === true ? 'selected' : ''}`}
+                    onClick={() => handleInputChange('loaner_required', true)}
+                  >
+                    <div className="toggle-card-icon">✓</div>
+                    <div className="toggle-card-title">Yes</div>
+                    <div className="toggle-card-desc">Loaner equipment needed</div>
+                  </div>
+                  <div
+                    className={`toggle-card ${formData.loaner_required === false ? 'selected' : ''}`}
+                    onClick={() => handleInputChange('loaner_required', false)}
+                  >
+                    <div className="toggle-card-icon">✗</div>
+                    <div className="toggle-card-title">No</div>
+                    <div className="toggle-card-desc">No loaner needed</div>
+                  </div>
                 </div>
               </div>
 
-              {formData.loaner_required && (
-                <div className="form-group">
-                  <label>Loaner Details</label>
-                  <textarea
-                    className="form-control"
-                    value={formData.loaner_details || ''}
-                    onChange={(e) =>
-                      handleInputChange('loaner_details', e.target.value)
-                    }
-                    placeholder="Specify loaner requirements..."
-                    rows={2}
-                  />
-                </div>
-              )}
-
               <div className="form-group">
-                <label className="checkbox-label">
-                  <input
-                    type="checkbox"
-                    checked={formData.quote_required || false}
-                    onChange={(e) =>
-                      handleInputChange('quote_required', e.target.checked)
-                    }
-                  />
-                  Quote Required
-                </label>
+                <label>Quote Required? *</label>
+                <div className="toggle-cards">
+                  <div
+                    className={`toggle-card ${formData.quote_required === true ? 'selected' : ''}`}
+                    onClick={() => handleInputChange('quote_required', true)}
+                  >
+                    <div className="toggle-card-icon">💰</div>
+                    <div className="toggle-card-title">Yes</div>
+                    <div className="toggle-card-desc">Request a quote</div>
+                  </div>
+                  <div
+                    className={`toggle-card ${formData.quote_required === false ? 'selected' : ''}`}
+                    onClick={() => handleInputChange('quote_required', false)}
+                  >
+                    <div className="toggle-card-icon">✗</div>
+                    <div className="toggle-card-title">No</div>
+                    <div className="toggle-card-desc">No quote needed</div>
+                  </div>
+                </div>
               </div>
 
               <h3 style={{ marginTop: '2rem', marginBottom: '1rem' }}>Pickup Information</h3>
@@ -1059,7 +1112,6 @@ const IntakeForm: React.FC<IntakeFormProps> = ({ onSubmit: onSubmitCallback, onC
               <div className="review-section">
                 <h4>Service Requirements</h4>
                 <p><strong>Loaner Required:</strong> {formData.loaner_required ? 'Yes' : 'No'}</p>
-                {formData.loaner_details && <p><strong>Loaner Details:</strong> {formData.loaner_details}</p>}
                 <p><strong>Quote Required:</strong> {formData.quote_required ? 'Yes' : 'No'}</p>
                 <p><strong>Pickup Date:</strong> {formData.pickup_date}</p>
                 <p><strong>Pickup Time:</strong> {formData.pickup_time}</p>
