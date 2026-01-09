@@ -16,6 +16,21 @@ interface IntakeFormProps {
   onCancel?: () => void;
 }
 
+interface Item {
+  item_number: string;
+  item_description: string;
+  serial_number?: string;
+  product_family?: string;
+  instance_count?: number;
+}
+
+interface Customer {
+  customer_number: string;
+  customer_name: string;
+  territory_code: string;
+  country_code: string;
+}
+
 // Multi-step form for service request intake (UR-048)
 const IntakeForm: React.FC<IntakeFormProps> = ({ onSubmit: onSubmitCallback, onCancel }) => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -49,6 +64,16 @@ const IntakeForm: React.FC<IntakeFormProps> = ({ onSubmit: onSubmitCallback, onC
 
   // Address editing modal state
   const [showAddressModal, setShowAddressModal] = useState(false);
+
+  // Customer search state (for sales/tech/admin)
+  const [customerSearchTerm, setCustomerSearchTerm] = useState('');
+  const [filteredCustomers, setFilteredCustomers] = useState<Customer[]>([]);
+  const [showCustomerDropdown, setShowCustomerDropdown] = useState(false);
+
+  // Item search/autocomplete state
+  const [itemSearchTerm, setItemSearchTerm] = useState('');
+  const [filteredItems, setFilteredItems] = useState<Item[]>([]);
+  const [showItemDropdown, setShowItemDropdown] = useState(false);
 
   useEffect(() => {
     loadInitialData();
@@ -99,6 +124,83 @@ const IntakeForm: React.FC<IntakeFormProps> = ({ onSubmit: onSubmitCallback, onC
     } catch (error) {
       console.error('Failed to load issue reasons:', error);
     }
+  };
+
+  // Customer search handler (for sales/tech/admin)
+  const handleCustomerSearch = async (searchTerm: string) => {
+    setCustomerSearchTerm(searchTerm);
+
+    if (searchTerm.length < 2) {
+      setFilteredCustomers([]);
+      setShowCustomerDropdown(false);
+      return;
+    }
+
+    try {
+      const results = await apiService.get<Customer[]>(
+        API_ENDPOINTS.SEARCH_CUSTOMERS,
+        { query: searchTerm }
+      );
+      setFilteredCustomers(results);
+      setShowCustomerDropdown(results.length > 0);
+    } catch (error) {
+      console.error('Failed to search customers:', error);
+      setFilteredCustomers([]);
+      setShowCustomerDropdown(false);
+    }
+  };
+
+  const handleSelectCustomer = (customer: Customer) => {
+    setFormData({
+      ...formData,
+      customer_number: customer.customer_number,
+      customer_name: customer.customer_name,
+      territory_code: customer.territory_code,
+      country_code: customer.country_code,
+    });
+    setCustomerSearchTerm(customer.customer_name);
+    setShowCustomerDropdown(false);
+  };
+
+  // Item search handler (for Serial/Item lookup)
+  const handleItemSearch = async (searchTerm: string) => {
+    setItemSearchTerm(searchTerm);
+
+    if (searchTerm.length < 2) {
+      setFilteredItems([]);
+      setShowItemDropdown(false);
+      return;
+    }
+
+    try {
+      const results = await apiService.get<Item[]>(
+        API_ENDPOINTS.LOOKUP_ITEM,
+        { q: searchTerm }
+      );
+      setFilteredItems(results);
+      setShowItemDropdown(results.length > 0);
+    } catch (error) {
+      console.error('Failed to search items:', error);
+      setFilteredItems([]);
+      setShowItemDropdown(false);
+    }
+  };
+
+  const handleSelectItem = (item: Item) => {
+    setFormData({
+      ...formData,
+      item_number: item.item_number,
+      serial_number: item.serial_number || '',
+      item_description: item.item_description,
+      product_family: item.product_family || '',
+    });
+    setItemSearchTerm(`${item.item_number} - ${item.item_description}`);
+    setShowItemDropdown(false);
+    setAutoFilledData({
+      ItemDescription: item.item_description,
+      ProductFamily: item.product_family,
+      RepairabilityStatus: 'Available', // Default
+    });
   };
 
   // Validate item when serial/item number is entered (UR-032, UR-033, UR-035)
@@ -334,56 +436,100 @@ const IntakeForm: React.FC<IntakeFormProps> = ({ onSubmit: onSubmitCallback, onC
                 </div>
               </div>
 
-              {formData.request_type === 'Serial' && (
+              {(formData.request_type === 'Serial' || formData.request_type === 'Item') && (
                 <div className="form-group">
-                  <label>Serial Number *</label>
-                  <div className="input-with-button">
+                  <label>Search Item/Serial *</label>
+                  <div className="autocomplete-wrapper">
                     <input
                       type="text"
                       className="form-control"
-                      value={formData.serial_number || ''}
-                      onChange={(e) =>
-                        handleInputChange('serial_number', e.target.value)
-                      }
-                      placeholder="Enter serial number"
+                      value={itemSearchTerm}
+                      onChange={(e) => handleItemSearch(e.target.value)}
+                      onFocus={() => filteredItems.length > 0 && setShowItemDropdown(true)}
+                      placeholder="Type to search by serial number or item number..."
                     />
-                    <button
-                      type="button"
-                      className="btn-validate"
-                      onClick={handleValidateItem}
-                    >
-                      Validate
-                    </button>
-                  </div>
-                </div>
-              )}
 
-              {formData.request_type === 'Item' && (
-                <div className="form-group">
-                  <label>Item Number *</label>
-                  <div className="input-with-button">
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={formData.item_number || ''}
-                      onChange={(e) =>
-                        handleInputChange('item_number', e.target.value)
-                      }
-                      placeholder="Enter item number"
-                    />
-                    <button
-                      type="button"
-                      className="btn-validate"
-                      onClick={handleValidateItem}
-                    >
-                      Validate
-                    </button>
+                    {showItemDropdown && filteredItems.length > 0 && (
+                      <div className="autocomplete-results">
+                        {filteredItems.map((item, index) => (
+                          <div
+                            key={index}
+                            className="autocomplete-result-item"
+                            onClick={() => handleSelectItem(item)}
+                          >
+                            <div className="item-info">
+                              <span className="item-badge">Item: {item.item_number}</span>
+                              {item.serial_number && <span className="item-badge">Serial: {item.serial_number}</span>}
+                            </div>
+                            <div className="item-desc">{item.item_description}</div>
+                            {item.product_family && <div className="item-family">{item.product_family}</div>}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
+
+                  {formData.item_number && (
+                    <div className="selected-item">
+                      <h4>✓ Selected Item</h4>
+                      <div className="item-details">
+                        <p><strong>Item Number:</strong> {formData.item_number}</p>
+                        {formData.serial_number && <p><strong>Serial Number:</strong> {formData.serial_number}</p>}
+                        <p><strong>Description:</strong> {formData.item_description}</p>
+                        {formData.product_family && <p><strong>Product Family:</strong> {formData.product_family}</p>}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
               {formData.request_type === 'General' && (
                 <>
+                  <div className="form-group">
+                    <label>Search Customer *</label>
+                    <div className="autocomplete-wrapper">
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={customerSearchTerm}
+                        onChange={(e) => handleCustomerSearch(e.target.value)}
+                        onFocus={() => filteredCustomers.length > 0 && setShowCustomerDropdown(true)}
+                        placeholder="Type to search by customer name or number..."
+                      />
+
+                      {showCustomerDropdown && filteredCustomers.length > 0 && (
+                        <div className="autocomplete-results">
+                          {filteredCustomers.map((customer, index) => (
+                            <div
+                              key={index}
+                              className="autocomplete-result-item"
+                              onClick={() => handleSelectCustomer(customer)}
+                            >
+                              <div className="item-info">
+                                <span className="item-badge">Customer: {customer.customer_number}</span>
+                                <span className="item-badge">Territory: {customer.territory_code}</span>
+                              </div>
+                              <div className="item-desc">{customer.customer_name}</div>
+                              <div className="item-family">Country: {customer.country_code}</div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {formData.customer_name && (
+                      <div className="selected-item">
+                        <h4>✓ Selected Customer</h4>
+                        <div className="item-details">
+                          <p><strong>Customer Number:</strong> {formData.customer_number}</p>
+                          <p><strong>Customer Name:</strong> {formData.customer_name}</p>
+                          <p><strong>Territory:</strong> {formData.territory_code}</p>
+                          <p><strong>Country:</strong> {formData.country_code}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
                   <div className="form-group">
                     <label>Item Description *</label>
                     <input
@@ -394,18 +540,6 @@ const IntakeForm: React.FC<IntakeFormProps> = ({ onSubmit: onSubmitCallback, onC
                         handleInputChange('item_description', e.target.value)
                       }
                       placeholder="Describe the equipment"
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Customer Name *</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={formData.customer_name || ''}
-                      onChange={(e) =>
-                        handleInputChange('customer_name', e.target.value)
-                      }
-                      placeholder="Enter customer name"
                     />
                   </div>
                 </>
