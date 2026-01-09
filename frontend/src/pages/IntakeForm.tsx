@@ -72,6 +72,7 @@ const IntakeForm: React.FC<IntakeFormProps> = ({ onSubmit: onSubmitCallback, onC
   const [showCustomerDropdown, setShowCustomerDropdown] = useState(false);
 
   // Item search/autocomplete state
+  const [itemSearchType, setItemSearchType] = useState<'serial' | 'item' | 'lot'>('serial');
   const [itemSearchTerm, setItemSearchTerm] = useState('');
   const [filteredItems, setFilteredItems] = useState<Item[]>([]);
   const [showItemDropdown, setShowItemDropdown] = useState(false);
@@ -277,14 +278,8 @@ const IntakeForm: React.FC<IntakeFormProps> = ({ onSubmit: onSubmitCallback, onC
           return false;
         }
 
-        if (formData.request_type === 'Serial') {
-          return !!formData.serial_number;
-        } else if (formData.request_type === 'Item') {
-          return !!formData.item_number;
-        } else if (formData.request_type === 'General') {
-          return !!(formData.item_description && formData.customer_name);
-        }
-        return false;
+        // Item/Serial/Lot must be selected
+        return !!(formData.serial_number || formData.item_number || formData.lot_number);
       case 2:
         // Step 2: Issue Details (Main Reason and Safety/Patient are mandatory)
         return !!(formData.main_reason);
@@ -413,199 +408,128 @@ const IntakeForm: React.FC<IntakeFormProps> = ({ onSubmit: onSubmitCallback, onC
             <div className="form-step">
               <h2>Item Identification</h2>
 
-              {/* Customer search for sales/tech/admin users */}
-              {userRole !== 'customer' && (
-                <div className="form-group">
-                  <label>Search Customer *</label>
-                  <div className="autocomplete-wrapper">
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={customerSearchTerm}
-                      onChange={(e) => handleCustomerSearch(e.target.value)}
-                      onFocus={() => filteredCustomers.length > 0 && setShowCustomerDropdown(true)}
-                      placeholder="Type to search by customer name or number..."
-                    />
+              {/* Side-by-side search layout */}
+              <div className="search-container-sidebyside">
+                {/* Customer search for sales/tech/admin users */}
+                {userRole !== 'customer' && (
+                  <div className="search-column">
+                    <div className="form-group">
+                      <label>Search Customer *</label>
+                      <div className="autocomplete-wrapper">
+                        <input
+                          type="text"
+                          className="form-control"
+                          value={customerSearchTerm}
+                          onChange={(e) => handleCustomerSearch(e.target.value)}
+                          onFocus={() => filteredCustomers.length > 0 && setShowCustomerDropdown(true)}
+                          placeholder="Type to search by customer name or number..."
+                        />
 
-                    {showCustomerDropdown && filteredCustomers.length > 0 && (
-                      <div className="autocomplete-results">
-                        {filteredCustomers.map((customer, index) => (
-                          <div
-                            key={index}
-                            className="autocomplete-result-item"
-                            onClick={() => handleSelectCustomer(customer)}
-                          >
-                            <div className="item-info">
-                              <span className="item-badge">Customer: {customer.customer_number}</span>
-                              <span className="item-badge">Territory: {customer.territory_code}</span>
-                            </div>
-                            <div className="item-desc">{customer.customer_name}</div>
-                            <div className="item-family">Country: {customer.country_code}</div>
+                        {showCustomerDropdown && filteredCustomers.length > 0 && (
+                          <div className="autocomplete-results">
+                            {filteredCustomers.map((customer, index) => (
+                              <div
+                                key={index}
+                                className="autocomplete-result-item"
+                                onClick={() => handleSelectCustomer(customer)}
+                              >
+                                <div className="item-info">
+                                  <span className="item-badge">Customer: {customer.customer_number}</span>
+                                  <span className="item-badge">Territory: {customer.territory_code}</span>
+                                </div>
+                                <div className="item-desc">{customer.customer_name}</div>
+                                <div className="item-family">Country: {customer.country_code}</div>
+                              </div>
+                            ))}
                           </div>
-                        ))}
+                        )}
                       </div>
-                    )}
-                  </div>
 
-                  {formData.customer_name && (
-                    <div className="selected-item">
-                      <h4>✓ Selected Customer</h4>
-                      <div className="item-details">
-                        <p><strong>Customer Number:</strong> {formData.customer_number}</p>
-                        <p><strong>Customer Name:</strong> {formData.customer_name}</p>
-                        <p><strong>Country:</strong> {formData.country_code}</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              <div className="form-group">
-                <label>Request Type *</label>
-                <div className="radio-group">
-                  <label className="radio-label">
-                    <input
-                      type="radio"
-                      value="Serial"
-                      checked={formData.request_type === 'Serial'}
-                      onChange={(e) =>
-                        handleInputChange('request_type', e.target.value)
-                      }
-                    />
-                    Serial Number (Primary)
-                  </label>
-                  <label className="radio-label">
-                    <input
-                      type="radio"
-                      value="Item"
-                      checked={formData.request_type === 'Item'}
-                      onChange={(e) =>
-                        handleInputChange('request_type', e.target.value)
-                      }
-                    />
-                    Item Number (Secondary)
-                  </label>
-                  <label className="radio-label">
-                    <input
-                      type="radio"
-                      value="General"
-                      checked={formData.request_type === 'General'}
-                      onChange={(e) =>
-                        handleInputChange('request_type', e.target.value)
-                      }
-                    />
-                    General Request
-                  </label>
-                </div>
-              </div>
-
-              {(formData.request_type === 'Serial' || formData.request_type === 'Item') && (
-                <div className="form-group">
-                  <label>Search Item/Serial *</label>
-                  <div className="autocomplete-wrapper">
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={itemSearchTerm}
-                      onChange={(e) => handleItemSearch(e.target.value)}
-                      onFocus={() => filteredItems.length > 0 && setShowItemDropdown(true)}
-                      placeholder="Type to search by serial number or item number..."
-                    />
-
-                    {showItemDropdown && filteredItems.length > 0 && (
-                      <div className="autocomplete-results">
-                        {filteredItems.map((item, index) => (
-                          <div
-                            key={index}
-                            className="autocomplete-result-item"
-                            onClick={() => handleSelectItem(item)}
-                          >
-                            <div className="item-info">
-                              <span className="item-badge">Item: {item.item_number}</span>
-                              {item.serial_number && <span className="item-badge">Serial: {item.serial_number}</span>}
-                            </div>
-                            <div className="item-desc">{item.item_description}</div>
-                            {item.product_family && <div className="item-family">{item.product_family}</div>}
+                      {formData.customer_name && (
+                        <div className="selected-item">
+                          <h4>✓ Selected Customer</h4>
+                          <div className="item-details">
+                            <p><strong>Customer Number:</strong> {formData.customer_number}</p>
+                            <p><strong>Customer Name:</strong> {formData.customer_name}</p>
+                            <p><strong>Country:</strong> {formData.country_code}</p>
                           </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {formData.item_number && (
-                    <div className="selected-item">
-                      <h4>✓ Selected Item</h4>
-                      <div className="item-details">
-                        <p><strong>Item Number:</strong> {formData.item_number}</p>
-                        {formData.serial_number && <p><strong>Serial Number:</strong> {formData.serial_number}</p>}
-                        <p><strong>Description:</strong> {formData.item_description}</p>
-                        {formData.product_family && <p><strong>Product Family:</strong> {formData.product_family}</p>}
-                      </div>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-              )}
+                  </div>
+                )}
 
-              {formData.request_type === 'General' && (
-                <>
+                {/* Item/Serial/Lot search */}
+                <div className="search-column">
                   <div className="form-group">
-                    <label>Search Customer *</label>
+                    <label>Search By *</label>
+                    <select
+                      className="form-control"
+                      value={itemSearchType}
+                      onChange={(e) => {
+                        setItemSearchType(e.target.value as 'serial' | 'item' | 'lot');
+                        setItemSearchTerm('');
+                        setFilteredItems([]);
+                        setShowItemDropdown(false);
+                      }}
+                    >
+                      <option value="serial">Serial Number</option>
+                      <option value="item">Item Number</option>
+                      <option value="lot">Lot Number</option>
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label>
+                      {itemSearchType === 'serial' && 'Serial Number *'}
+                      {itemSearchType === 'item' && 'Item Number *'}
+                      {itemSearchType === 'lot' && 'Lot Number *'}
+                    </label>
                     <div className="autocomplete-wrapper">
                       <input
                         type="text"
                         className="form-control"
-                        value={customerSearchTerm}
-                        onChange={(e) => handleCustomerSearch(e.target.value)}
-                        onFocus={() => filteredCustomers.length > 0 && setShowCustomerDropdown(true)}
-                        placeholder="Type to search by customer name or number..."
+                        value={itemSearchTerm}
+                        onChange={(e) => handleItemSearch(e.target.value)}
+                        onFocus={() => filteredItems.length > 0 && setShowItemDropdown(true)}
+                        placeholder={`Type to search by ${itemSearchType}...`}
                       />
 
-                      {showCustomerDropdown && filteredCustomers.length > 0 && (
+                      {showItemDropdown && filteredItems.length > 0 && (
                         <div className="autocomplete-results">
-                          {filteredCustomers.map((customer, index) => (
+                          {filteredItems.map((item, index) => (
                             <div
                               key={index}
                               className="autocomplete-result-item"
-                              onClick={() => handleSelectCustomer(customer)}
+                              onClick={() => handleSelectItem(item)}
                             >
                               <div className="item-info">
-                                <span className="item-badge">Customer: {customer.customer_number}</span>
-                                <span className="item-badge">Territory: {customer.territory_code}</span>
+                                <span className="item-badge">Item: {item.item_number}</span>
+                                {item.serial_number && <span className="item-badge">Serial: {item.serial_number}</span>}
                               </div>
-                              <div className="item-desc">{customer.customer_name}</div>
-                              <div className="item-family">Country: {customer.country_code}</div>
+                              <div className="item-desc">{item.item_description}</div>
+                              {item.product_family && <div className="item-family">{item.product_family}</div>}
                             </div>
                           ))}
                         </div>
                       )}
                     </div>
 
-                    {formData.customer_name && (
+                    {formData.item_number && (
                       <div className="selected-item">
-                        <h4>✓ Selected Customer</h4>
+                        <h4>✓ Selected Item</h4>
                         <div className="item-details">
-                          <p><strong>Customer Number:</strong> {formData.customer_number}</p>
-                          <p><strong>Customer Name:</strong> {formData.customer_name}</p>
-                          <p><strong>Country:</strong> {formData.country_code}</p>
+                          <p><strong>Item Number:</strong> {formData.item_number}</p>
+                          {formData.serial_number && <p><strong>Serial Number:</strong> {formData.serial_number}</p>}
+                          {formData.lot_number && <p><strong>Lot Number:</strong> {formData.lot_number}</p>}
+                          <p><strong>Description:</strong> {formData.item_description}</p>
+                          {formData.product_family && <p><strong>Product Family:</strong> {formData.product_family}</p>}
                         </div>
                       </div>
                     )}
                   </div>
-
-                  <div className="form-group">
-                    <label>Item Description *</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={formData.item_description || ''}
-                      onChange={(e) =>
-                        handleInputChange('item_description', e.target.value)
-                      }
-                      placeholder="Describe the equipment"
-                    />
-                  </div>
-                </>
-              )}
+                </div>
+              </div>
 
               {autoFilledData && (
                 <div className="autofill-info">

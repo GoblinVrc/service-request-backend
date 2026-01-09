@@ -545,6 +545,30 @@ textarea.form-control {
   font-weight: 600;
 }
 
+/* Side-by-side search layout */
+.search-container-sidebyside {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.search-column {
+  min-width: 0; /* Allow flex items to shrink */
+}
+
+/* Align both search input fields at same height */
+.search-column > .form-group:first-child {
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 968px) {
+  .search-container-sidebyside {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
 /* Toggle Cards for Yes/No choices */
 .toggle-cards {
   display: grid;
