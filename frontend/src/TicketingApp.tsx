@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import LoginScreen from './components/LoginScreen';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
-import SubmitRequest from './components/SubmitRequest';
+import IntakeForm from './pages/IntakeForm';
 import TicketDetail from './components/TicketDetail';
 import RequestTypeModal from './components/RequestTypeModal';
 import ComingSoon from './pages/ComingSoon';
@@ -102,7 +102,7 @@ const TicketingApp: React.FC = () => {
         )}
 
         {currentView === 'submit' && (
-          <SubmitRequest onSubmit={handleSubmitRequest} onCancel={handleCancelSubmit} />
+          <IntakeForm onSubmit={handleSubmitRequest} onCancel={handleCancelSubmit} />
         )}
 
         {currentView === 'detail' && selectedTicketId && (

@@ -12,8 +12,13 @@ import {
 import AddressEditModal from '../components/AddressEditModal';
 import './IntakeForm.css';
 
+interface IntakeFormProps {
+  onSubmit?: () => void;
+  onCancel?: () => void;
+}
+
 // Multi-step form for service request intake (UR-048)
-const IntakeForm: React.FC = () => {
+const IntakeForm: React.FC<IntakeFormProps> = ({ onSubmit: onSubmitCallback, onCancel }) => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [countries, setCountries] = useState<Country[]>([]);
