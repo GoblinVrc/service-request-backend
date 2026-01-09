@@ -352,6 +352,7 @@ const IntakeForm: React.FC<IntakeFormProps> = ({ onSubmit: onSubmitCallback, onC
 
     setSubmitting(true);
     try {
+      console.log('Submitting form data:', formData);
       const response = await apiService.post<SubmitResponse>(
         API_ENDPOINTS.SUBMIT_REQUEST,
         formData
@@ -364,9 +365,24 @@ const IntakeForm: React.FC<IntakeFormProps> = ({ onSubmit: onSubmitCallback, onC
       });
       setShowSuccessModal(true);
     } catch (error: any) {
-      setValidationMessage(
-        `❌ ${error.response?.data?.detail || 'Submission failed'}`
-      );
+      console.error('Submit error:', error);
+      console.error('Error response:', error.response);
+
+      // Handle error message properly
+      let errorMsg = 'Submission failed';
+      if (error.response?.data?.detail) {
+        const detail = error.response.data.detail;
+        // If detail is an array (FastAPI validation errors)
+        if (Array.isArray(detail)) {
+          errorMsg = detail.map((err: any) => `${err.loc?.join('.')}: ${err.msg}`).join(', ');
+        } else if (typeof detail === 'object') {
+          errorMsg = JSON.stringify(detail);
+        } else {
+          errorMsg = detail;
+        }
+      }
+
+      setValidationMessage(`❌ ${errorMsg}`);
       setSubmitting(false);
     }
   };
