@@ -1,13 +1,12 @@
 import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
 import './ComingSoon.css';
 
-const ComingSoon: React.FC = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
+interface ComingSoonProps {
+  type?: 'maintenance' | 'installation';
+  onBack?: () => void;
+}
 
-  // Get the type from URL or state
-  const type = new URLSearchParams(location.search).get('type') || 'feature';
+const ComingSoon: React.FC<ComingSoonProps> = ({ type = 'feature', onBack }) => {
 
   const getIcon = () => {
     switch (type) {
@@ -53,7 +52,7 @@ const ComingSoon: React.FC = () => {
         </p>
         <button
           className="btn-back-to-dashboard"
-          onClick={() => navigate('/dashboard')}
+          onClick={onBack}
         >
           Back to Dashboard
         </button>

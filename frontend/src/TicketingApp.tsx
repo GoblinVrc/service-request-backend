@@ -110,7 +110,10 @@ const TicketingApp: React.FC = () => {
         )}
 
         {currentView === 'coming-soon' && comingSoonType && (
-          <ComingSoon />
+          <ComingSoon
+            type={comingSoonType}
+            onBack={() => setCurrentView('dashboard')}
+          />
         )}
       </main>
 
