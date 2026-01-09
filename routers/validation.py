@@ -177,14 +177,14 @@ def search_customers(
 
     try:
         sql = """
-            SELECT
+            SELECT DISTINCT
                 c.customer_number,
                 c.customer_name,
-                c.territory_code,
-                c.country_code,
-                c.city,
-                c.address_line1
+                ct.territory as territory_code,
+                c.country_code
             FROM regops_app.tbl_globi_eu_am_99_customers c
+            LEFT JOIN regops_app.tbl_globi_eu_am_99_customer_territories ct
+                ON c.customer_number = ct.customer_number
             WHERE c.is_active = true
         """
 
@@ -194,7 +194,7 @@ def search_customers(
         if token_data.role == Roles.SALES_TECH:
             if token_data.territories and len(token_data.territories) > 0:
                 placeholders = ','.join(['%s'] * len(token_data.territories))
-                sql += f" AND c.territory_code IN ({placeholders})"
+                sql += f" AND ct.territory IN ({placeholders})"
                 params.extend(token_data.territories)
 
         # Search query
