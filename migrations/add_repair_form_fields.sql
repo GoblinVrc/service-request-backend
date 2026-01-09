@@ -6,17 +6,12 @@
 
 BEGIN;
 
--- Add Ship-To Address fields (replacing old structure with 4-field structure)
+-- Add Ship-To Address fields (4-field structure per UR-1121517)
 ALTER TABLE regops_app.tbl_globi_eu_am_99_service_requests
     ADD COLUMN IF NOT EXISTS ship_to_street VARCHAR(200),
     ADD COLUMN IF NOT EXISTS ship_to_zip VARCHAR(20),
     ADD COLUMN IF NOT EXISTS ship_to_city VARCHAR(100),
     ADD COLUMN IF NOT EXISTS ship_to_country VARCHAR(10);
-
--- Migrate existing ship_to_address data to ship_to_street if exists
-UPDATE regops_app.tbl_globi_eu_am_99_service_requests
-SET ship_to_street = ship_to_address
-WHERE ship_to_address IS NOT NULL AND ship_to_street IS NULL;
 
 -- Add Alternative Billing Address fields (optional)
 ALTER TABLE regops_app.tbl_globi_eu_am_99_service_requests

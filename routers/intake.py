@@ -27,6 +27,18 @@ class ServiceRequestCreate(BaseModel):
     customer_name: Optional[str] = None
     site_address: Optional[str] = None
 
+    # Ship-To Address (4-field structure per UR-1121517)
+    ship_to_street: Optional[str] = None
+    ship_to_zip: Optional[str] = None
+    ship_to_city: Optional[str] = None
+    ship_to_country: Optional[str] = None
+
+    # Alternative Billing Address (optional, 4-field structure)
+    alternative_billing_street: Optional[str] = None
+    alternative_billing_zip: Optional[str] = None
+    alternative_billing_city: Optional[str] = None
+    alternative_billing_country: Optional[str] = None
+
     # Product/Item Information (conditional mandatory based on request_type)
     serial_number: Optional[str] = None
     item_number: Optional[str] = None
@@ -38,6 +50,10 @@ class ServiceRequestCreate(BaseModel):
     sub_reason: Optional[str] = None
     issue_description: Optional[str] = None
 
+    # Safety & Patient Involvement (MANDATORY per UR-1121517)
+    safety_patient_involved: bool = False
+    safety_patient_details: Optional[str] = None
+
     # Service Details
     requested_service_date: Optional[date] = None
     urgency_level: Optional[str] = 'Normal'
@@ -46,6 +62,19 @@ class ServiceRequestCreate(BaseModel):
     loaner_required: bool = False
     loaner_details: Optional[str] = None
     quote_required: bool = False
+
+    # Pickup Information (MANDATORY per UR-1121517)
+    pickup_date: str  # MANDATORY
+    pickup_time: str  # MANDATORY
+
+    # PO & Customer Ident (MANDATORY per UR-1121517)
+    po_reference_number: str  # MANDATORY
+    customer_ident_code: str  # MANDATORY
+
+    # Optional Fields
+    preferred_contact_method: Optional[str] = None
+    contract_info: Optional[str] = None
+    loaner_fee_approval: Optional[bool] = False
 
     # Metadata
     language_code: str = 'en'
@@ -134,7 +163,7 @@ def submit_service_request(
         if not territory_code:
             raise HTTPException(400, "Unable to determine territory for request")
 
-        # Insert service request
+        # Insert service request - Updated per UR-1121517
         insert_query = """
             INSERT INTO regops_app.tbl_globi_eu_am_99_service_requests (
                 request_code,
@@ -147,6 +176,14 @@ def submit_service_request(
                 country_code,
                 territory_code,
                 site_address,
+                ship_to_street,
+                ship_to_zip,
+                ship_to_city,
+                ship_to_country,
+                alternative_billing_street,
+                alternative_billing_zip,
+                alternative_billing_city,
+                alternative_billing_country,
                 serial_number,
                 item_number,
                 lot_number,
@@ -155,12 +192,21 @@ def submit_service_request(
                 main_reason,
                 sub_reason,
                 issue_description,
+                safety_patient_involved,
+                safety_patient_details,
                 repairability_status,
                 requested_service_date,
                 urgency_level,
                 loaner_required,
                 loaner_details,
                 quote_required,
+                pickup_date,
+                pickup_time,
+                po_reference_number,
+                customer_ident_code,
+                preferred_contact_method,
+                contract_info,
+                loaner_fee_approval,
                 status,
                 submitted_by_email,
                 submitted_by_name,
@@ -169,7 +215,9 @@ def submit_service_request(
             ) VALUES (
                 %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
                 %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                %s, %s, %s, %s, 'Submitted', %s, %s, %s, %s
+                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                %s, 'Submitted', %s, %s, %s, %s
             )
             RETURNING id;
         """
@@ -185,6 +233,14 @@ def submit_service_request(
             request.country_code,
             territory_code,
             request.site_address,
+            request.ship_to_street,
+            request.ship_to_zip,
+            request.ship_to_city,
+            request.ship_to_country,
+            request.alternative_billing_street,
+            request.alternative_billing_zip,
+            request.alternative_billing_city,
+            request.alternative_billing_country,
             request.serial_number,
             request.item_number,
             request.lot_number,
@@ -193,12 +249,21 @@ def submit_service_request(
             request.main_reason,
             request.sub_reason,
             request.issue_description,
+            request.safety_patient_involved,
+            request.safety_patient_details,
             repairability_status,
             request.requested_service_date,
             request.urgency_level,
             request.loaner_required,
             request.loaner_details,
             request.quote_required,
+            request.pickup_date,
+            request.pickup_time,
+            request.po_reference_number,
+            request.customer_ident_code,
+            request.preferred_contact_method,
+            request.contract_info,
+            request.loaner_fee_approval,
             token_data.email,
             token_data.name,
             request.language_code,
