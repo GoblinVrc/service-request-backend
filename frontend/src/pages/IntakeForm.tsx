@@ -155,7 +155,6 @@ const IntakeForm: React.FC<IntakeFormProps> = ({ onSubmit: onSubmitCallback, onC
       ...formData,
       customer_number: customer.customer_number,
       customer_name: customer.customer_name,
-      territory_code: customer.territory_code,
       country_code: customer.country_code,
     });
     setCustomerSearchTerm(customer.customer_name);
@@ -523,7 +522,6 @@ const IntakeForm: React.FC<IntakeFormProps> = ({ onSubmit: onSubmitCallback, onC
                         <div className="item-details">
                           <p><strong>Customer Number:</strong> {formData.customer_number}</p>
                           <p><strong>Customer Name:</strong> {formData.customer_name}</p>
-                          <p><strong>Territory:</strong> {formData.territory_code}</p>
                           <p><strong>Country:</strong> {formData.country_code}</p>
                         </div>
                       </div>
