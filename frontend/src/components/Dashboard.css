@@ -247,14 +247,30 @@
   white-space: nowrap;
 }
 
+/* Status colors matching TicketDetail page */
 .status-open {
   background: #e3f2fd;
   color: #1565c0;
 }
 
+.status-received {
+  background: #f3e5f5;
+  color: #7b1fa2;
+}
+
 .status-in-progress {
   background: #fff3e0;
   color: #e65100;
+}
+
+.status-repair-completed {
+  background: #e0f2f1;
+  color: #00695c;
+}
+
+.status-shipped-back {
+  background: #ede7f6;
+  color: #512da8;
 }
 
 .status-resolved {

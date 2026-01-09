@@ -111,12 +111,20 @@ const Dashboard: React.FC<DashboardProps> = ({ onTicketClick, filters }) => {
     switch (status) {
       case 'Open':
         return 'status-open';
+      case 'Received':
+        return 'status-received';
       case 'In Progress':
         return 'status-in-progress';
+      case 'Repair Completed':
+        return 'status-repair-completed';
+      case 'Shipped Back':
+        return 'status-shipped-back';
       case 'Resolved':
         return 'status-resolved';
       case 'Closed':
         return 'status-closed';
+      case 'Submitted':
+        return 'status-open'; // Map Submitted to Open styling
       default:
         return '';
     }
