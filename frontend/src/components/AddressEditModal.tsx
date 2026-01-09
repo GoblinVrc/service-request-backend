@@ -8,8 +8,7 @@ interface AddressEditModalProps {
   onSave: (newAddress: {
     address: string;
     city: string;
-    state: string;
-    postalCode: string;
+    zip: string;
     country: string;
   }) => void;
 }
@@ -22,8 +21,7 @@ const AddressEditModal: React.FC<AddressEditModalProps> = ({
 }) => {
   const [address, setAddress] = useState('');
   const [city, setCity] = useState('');
-  const [state, setState] = useState('');
-  const [postalCode, setPostalCode] = useState('');
+  const [zip, setZip] = useState('');
   const [country, setCountry] = useState('');
 
   useEffect(() => {
@@ -42,8 +40,7 @@ const AddressEditModal: React.FC<AddressEditModalProps> = ({
     onSave({
       address,
       city,
-      state,
-      postalCode,
+      zip,
       country,
     });
     onClose();
@@ -84,29 +81,18 @@ const AddressEditModal: React.FC<AddressEditModalProps> = ({
             </div>
 
             <div className="form-group">
-              <label>State/Province</label>
+              <label>Postal/Zip Code</label>
               <input
                 type="text"
                 className="form-control"
-                value={state}
-                onChange={(e) => setState(e.target.value)}
-                placeholder="State"
+                value={zip}
+                onChange={(e) => setZip(e.target.value)}
+                placeholder="12345"
               />
             </div>
           </div>
 
           <div className="form-row">
-            <div className="form-group">
-              <label>Postal Code</label>
-              <input
-                type="text"
-                className="form-control"
-                value={postalCode}
-                onChange={(e) => setPostalCode(e.target.value)}
-                placeholder="12345"
-              />
-            </div>
-
             <div className="form-group">
               <label>Country *</label>
               <input

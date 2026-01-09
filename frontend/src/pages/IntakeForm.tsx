@@ -195,16 +195,14 @@ const IntakeForm: React.FC = () => {
   const handleAddressSave = (newAddress: {
     address: string;
     city: string;
-    state: string;
-    postalCode: string;
+    zip: string;
     country: string;
   }) => {
     setFormData({
       ...formData,
-      ship_to_address: newAddress.address,
+      ship_to_street: newAddress.address,
       ship_to_city: newAddress.city,
-      ship_to_state: newAddress.state,
-      ship_to_postal_code: newAddress.postalCode,
+      ship_to_zip: newAddress.zip,
       ship_to_country: newAddress.country,
     });
   };
@@ -582,14 +580,13 @@ const IntakeForm: React.FC = () => {
                     <strong>Current Address:</strong>
                     <p>{formData.site_address || 'No address on file'}</p>
                   </div>
-                  {formData.ship_to_address && (
+                  {formData.ship_to_street && (
                     <div className="ship-to-address">
                       <strong>Ship-To Address (Updated):</strong>
                       <p>
-                        {formData.ship_to_address}
-                        {formData.ship_to_city && `, ${formData.ship_to_city}`}
-                        {formData.ship_to_state && `, ${formData.ship_to_state}`}
-                        {formData.ship_to_postal_code && ` ${formData.ship_to_postal_code}`}
+                        {formData.ship_to_street}
+                        {formData.ship_to_zip && `, ${formData.ship_to_zip}`}
+                        {formData.ship_to_city && ` ${formData.ship_to_city}`}
                         {formData.ship_to_country && `, ${formData.ship_to_country}`}
                       </p>
                     </div>
@@ -599,7 +596,7 @@ const IntakeForm: React.FC = () => {
                     className="btn-edit-address"
                     onClick={() => setShowAddressModal(true)}
                   >
-                    {formData.ship_to_address ? 'Edit Ship-To Address' : 'Set Different Ship-To Address'}
+                    {formData.ship_to_street ? 'Edit Ship-To Address' : 'Set Different Ship-To Address'}
                   </button>
                 </div>
               </div>
