@@ -699,6 +699,8 @@ const IntakeForm: React.FC<IntakeFormProps> = ({ onSubmit: onSubmitCallback, onC
                     handleInputChange('contact_email', e.target.value)
                   }
                   placeholder="email@example.com"
+                  pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(com|org|net|edu|gov|mil|int|co|uk|de|fr|jp|cn|au|us|ca|br|ru|in|it|nl|pl|es|se|no|fi|dk|be|ch|at|pt|cz|gr|ie|nz|za|kr|mx|ar|cl|sg|hk|th|vn|my|ph|id|ae|sa|eg|tr|ro|hu|sk|si|hr|bg|lt|lv|ee|is|lu|mt|cy)"
+                  title="Please enter a valid email address with a recognized domain"
                 />
               </div>
 
