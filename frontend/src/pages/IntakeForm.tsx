@@ -475,9 +475,12 @@ const IntakeForm: React.FC<IntakeFormProps> = ({ onSubmit: onSubmitCallback, onC
                         <div className="selected-item">
                           <h4>✓ Selected Customer</h4>
                           <div className="item-details">
-                            <p><strong>Customer Number:</strong> {formData.customer_number}</p>
-                            <p><strong>Customer Name:</strong> {formData.customer_name}</p>
-                            <p><strong>Country:</strong> {formData.country_code}</p>
+                            <p><strong>{formData.customer_number}</strong> - {formData.customer_name}</p>
+                            {formData.site_address && <p>{formData.site_address}</p>}
+                            {(formData.ship_to_zip || formData.ship_to_city) && (
+                              <p>{formData.ship_to_zip} {formData.ship_to_city}</p>
+                            )}
+                            {formData.country_code && <p>{formData.country_code}</p>}
                           </div>
                         </div>
                       )}
@@ -523,11 +526,10 @@ const IntakeForm: React.FC<IntakeFormProps> = ({ onSubmit: onSubmitCallback, onC
                       <div className="selected-item">
                         <h4>✓ Selected Item</h4>
                         <div className="item-details">
-                          <p><strong>Item Number:</strong> {formData.item_number}</p>
+                          <p><strong>Item Code:</strong> {formData.item_number}</p>
+                          <p><strong>Description:</strong> {formData.item_description}</p>
                           {formData.serial_number && <p><strong>Serial Number:</strong> {formData.serial_number}</p>}
                           {formData.lot_number && <p><strong>Lot Number:</strong> {formData.lot_number}</p>}
-                          <p><strong>Description:</strong> {formData.item_description}</p>
-                          {formData.product_family && <p><strong>Product Family:</strong> {formData.product_family}</p>}
                         </div>
                       </div>
                     )}
@@ -560,25 +562,24 @@ const IntakeForm: React.FC<IntakeFormProps> = ({ onSubmit: onSubmitCallback, onC
                 </select>
               </div>
 
-              {formData.main_reason && issueReasons[formData.main_reason]?.length > 0 && (
-                <div className="form-group">
-                  <label>Sub Reason</label>
-                  <select
-                    className="form-control"
-                    value={formData.sub_reason || ''}
-                    onChange={(e) =>
-                      handleInputChange('sub_reason', e.target.value)
-                    }
-                  >
-                    <option value="">-- Select Sub Reason --</option>
-                    {issueReasons[formData.main_reason].map((sub) => (
-                      <option key={sub} value={sub}>
-                        {sub}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
+              <div className="form-group">
+                <label>Sub Reason</label>
+                <select
+                  className="form-control"
+                  value={formData.sub_reason || ''}
+                  onChange={(e) =>
+                    handleInputChange('sub_reason', e.target.value)
+                  }
+                  disabled={!formData.main_reason || !issueReasons[formData.main_reason]?.length}
+                >
+                  <option value="">-- Select Sub Reason --</option>
+                  {formData.main_reason && issueReasons[formData.main_reason]?.map((sub) => (
+                    <option key={sub} value={sub}>
+                      {sub}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
               <div className="form-group">
                 <label>Detailed Description</label>
@@ -986,58 +987,83 @@ const IntakeForm: React.FC<IntakeFormProps> = ({ onSubmit: onSubmitCallback, onC
             <div className="form-step">
               <h2>Review Your Request</h2>
 
-              <div className="review-section">
-                <h4>Item Information</h4>
-                <p><strong>Request Type:</strong> {formData.request_type}</p>
-                {formData.serial_number && <p><strong>Serial Number:</strong> {formData.serial_number}</p>}
-                {formData.item_number && <p><strong>Item Number:</strong> {formData.item_number}</p>}
-                {formData.item_description && <p><strong>Description:</strong> {formData.item_description}</p>}
-                {formData.customer_name && <p><strong>Customer:</strong> {formData.customer_name}</p>}
+              {/* Two-column layout for main sections */}
+              <div className="summary-two-columns">
+                {/* Left Column: Item Information + Issue Details */}
+                <div className="summary-column-left">
+                  <div className="review-section">
+                    <h4>Item Information</h4>
+                    <p><strong>Request Type:</strong> {formData.request_type}</p>
+                    {formData.serial_number && <p><strong>Serial Number:</strong> {formData.serial_number}</p>}
+                    {formData.item_number && <p><strong>Item Code:</strong> {formData.item_number}</p>}
+                    {formData.item_description && <p><strong>Description:</strong> {formData.item_description}</p>}
+                    {formData.lot_number && <p><strong>Lot Number:</strong> {formData.lot_number}</p>}
+                    {formData.customer_name && <p><strong>Customer:</strong> {formData.customer_name}</p>}
+                  </div>
+
+                  <div className="review-section">
+                    <h4>Issue Details</h4>
+                    <p><strong>Main Reason:</strong> {formData.main_reason}</p>
+                    {formData.sub_reason && <p><strong>Sub Reason:</strong> {formData.sub_reason}</p>}
+                    {formData.issue_description && <p><strong>Details:</strong> {formData.issue_description}</p>}
+                    <p><strong>Safety/Patient Involved:</strong> {formData.safety_patient_involved ? 'Yes' : 'No'}</p>
+                    {formData.safety_patient_details && <p><strong>Safety Details:</strong> {formData.safety_patient_details}</p>}
+                    <p><strong>Urgency:</strong> {formData.urgency_level}</p>
+                  </div>
+                </div>
+
+                {/* Right Column: Contact Information + Address */}
+                <div className="summary-column-right">
+                  <div className="review-section">
+                    <h4>Contact Information</h4>
+                    <p><strong>Name:</strong> {formData.contact_name}</p>
+                    <p><strong>Email:</strong> {formData.contact_email}</p>
+                    <p><strong>Phone:</strong> {formData.contact_phone}</p>
+                    {formData.preferred_contact_method && (
+                      <p><strong>Preferred Contact:</strong> {formData.preferred_contact_method}</p>
+                    )}
+                  </div>
+
+                  <div className="review-section">
+                    <h4>Addresses</h4>
+                    <p><strong>Bill-To:</strong> {formData.site_address || 'Not specified'}</p>
+                    {formData.ship_to_street ? (
+                      <p><strong>Ship-To:</strong> {formData.ship_to_street}, {formData.ship_to_zip} {formData.ship_to_city}, {formData.ship_to_country}</p>
+                    ) : (
+                      <p><strong>Ship-To:</strong> Same as Bill-To</p>
+                    )}
+                    {formData.alternative_billing_street && (
+                      <p><strong>Alt. Billing:</strong> {formData.alternative_billing_street}, {formData.alternative_billing_zip} {formData.alternative_billing_city}, {formData.alternative_billing_country}</p>
+                    )}
+                  </div>
+                </div>
               </div>
 
-              <div className="review-section">
-                <h4>Issue Details</h4>
-                <p><strong>Main Reason:</strong> {formData.main_reason}</p>
-                {formData.sub_reason && <p><strong>Sub Reason:</strong> {formData.sub_reason}</p>}
-                {formData.issue_description && <p><strong>Details:</strong> {formData.issue_description}</p>}
-                <p><strong>Safety/Patient Involved:</strong> {formData.safety_patient_involved ? 'Yes' : 'No'}</p>
-                {formData.safety_patient_details && <p><strong>Safety Details:</strong> {formData.safety_patient_details}</p>}
-                <p><strong>Urgency:</strong> {formData.urgency_level}</p>
-              </div>
-
-              <div className="review-section">
-                <h4>Contact Information</h4>
-                <p><strong>Name:</strong> {formData.contact_name}</p>
-                <p><strong>Email:</strong> {formData.contact_email}</p>
-                <p><strong>Phone:</strong> {formData.contact_phone}</p>
-                {formData.preferred_contact_method && (
-                  <p><strong>Preferred Contact:</strong> {formData.preferred_contact_method}</p>
-                )}
-              </div>
-
-              <div className="review-section">
-                <h4>Addresses</h4>
-                <p><strong>Bill-To:</strong> {formData.site_address || 'Not specified'}</p>
-                {formData.ship_to_street ? (
-                  <p><strong>Ship-To:</strong> {formData.ship_to_street}, {formData.ship_to_zip} {formData.ship_to_city}, {formData.ship_to_country}</p>
-                ) : (
-                  <p><strong>Ship-To:</strong> Same as Bill-To</p>
-                )}
-                {formData.alternative_billing_street && (
-                  <p><strong>Alt. Billing:</strong> {formData.alternative_billing_street}, {formData.alternative_billing_zip} {formData.alternative_billing_city}, {formData.alternative_billing_country}</p>
-                )}
-              </div>
-
-              <div className="review-section">
+              {/* Full-width Service Requirements with internal 2-column layout */}
+              <div className="review-section review-section-full">
                 <h4>Service Requirements</h4>
-                <p><strong>Loaner Required:</strong> {formData.loaner_required ? 'Yes' : 'No'}</p>
-                <p><strong>Quote Required:</strong> {formData.quote_required ? 'Yes' : 'No'}</p>
-                <p><strong>Pickup Date:</strong> {formData.pickup_date}</p>
-                <p><strong>Pickup Time:</strong> {formData.pickup_time}</p>
-                <p><strong>PO Reference:</strong> {formData.po_reference_number}</p>
-                <p><strong>Customer Ident Code:</strong> {formData.customer_ident_code}</p>
-                {formData.contract_info && <p><strong>Contract Info:</strong> {formData.contract_info}</p>}
-                {formData.customer_notes && <p><strong>Comments:</strong> {formData.customer_notes}</p>}
+                <div className="service-requirements-grid">
+                  <div className="service-req-left">
+                    <p><strong>Pickup Date:</strong> {formData.pickup_date}</p>
+                    <p><strong>Pickup Time:</strong> {formData.pickup_time}</p>
+                    <p><strong>Customer Ident Code:</strong> {formData.customer_ident_code}</p>
+                    <p><strong>PO Reference:</strong> {formData.po_reference_number}</p>
+                    {formData.contract_info && <p><strong>Contract Info:</strong> {formData.contract_info}</p>}
+                    {formData.customer_notes && <p><strong>Comments:</strong> {formData.customer_notes}</p>}
+                  </div>
+                  <div className="service-req-right">
+                    <div className="toggle-summary-cards">
+                      <div className={`toggle-summary-card ${formData.loaner_required ? 'active' : ''}`}>
+                        <div className="toggle-summary-icon">{formData.loaner_required ? '✓' : '✗'}</div>
+                        <div className="toggle-summary-label">Loaner Required</div>
+                      </div>
+                      <div className={`toggle-summary-card ${formData.quote_required ? 'active' : ''}`}>
+                        <div className="toggle-summary-icon">{formData.quote_required ? '💰' : '✗'}</div>
+                        <div className="toggle-summary-label">Quote Required</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           )}

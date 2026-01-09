@@ -621,3 +621,84 @@ textarea.form-control {
     grid-template-columns: 1fr;
   }
 }
+
+/* Summary Two-Column Layout */
+.summary-two-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.summary-column-left,
+.summary-column-right {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.review-section-full {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+/* Service Requirements Grid (internal 2 columns) */
+.service-requirements-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.service-req-left,
+.service-req-right {
+  min-width: 0;
+}
+
+/* Toggle Summary Cards (for read-only display in summary) */
+.toggle-summary-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.toggle-summary-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border: 2px solid #dee2e6;
+  border-radius: 8px;
+  background: #fff;
+  transition: all 0.3s ease;
+}
+
+.toggle-summary-card.active {
+  border-color: #4caf50;
+  background: #e8f5e9;
+}
+
+.toggle-summary-icon {
+  font-size: 1.5rem;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toggle-summary-label {
+  font-weight: 600;
+  color: var(--stryker-black);
+  font-size: 0.95rem;
+}
+
+@media (max-width: 968px) {
+  .summary-two-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .service-requirements-grid {
+    grid-template-columns: 1fr;
+  }
+}
