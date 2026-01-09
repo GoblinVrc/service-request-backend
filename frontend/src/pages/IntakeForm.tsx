@@ -9,6 +9,7 @@ import {
   ValidationResponse,
   SubmitResponse,
 } from '../types';
+import AddressEditModal from '../components/AddressEditModal';
 import './IntakeForm.css';
 
 // Multi-step form for service request intake (UR-048)
@@ -37,6 +38,9 @@ const IntakeForm: React.FC = () => {
 
   // Auto-filled data from validation (UR-038)
   const [autoFilledData, setAutoFilledData] = useState<any>(null);
+
+  // Address editing modal state
+  const [showAddressModal, setShowAddressModal] = useState(false);
 
   useEffect(() => {
     loadInitialData();
@@ -186,6 +190,23 @@ const IntakeForm: React.FC = () => {
   const handleBack = () => {
     setCurrentStep(currentStep - 1);
     setValidationMessage('');
+  };
+
+  const handleAddressSave = (newAddress: {
+    address: string;
+    city: string;
+    state: string;
+    postalCode: string;
+    country: string;
+  }) => {
+    setFormData({
+      ...formData,
+      ship_to_address: newAddress.address,
+      ship_to_city: newAddress.city,
+      ship_to_state: newAddress.state,
+      ship_to_postal_code: newAddress.postalCode,
+      ship_to_country: newAddress.country,
+    });
   };
 
   const handleSubmit = async () => {
@@ -553,6 +574,36 @@ const IntakeForm: React.FC = () => {
                 </select>
               </div>
 
+              {/* Ship-To Address Section */}
+              <div className="form-group">
+                <label>Ship-To Address</label>
+                <div className="address-display-section">
+                  <div className="current-address">
+                    <strong>Current Address:</strong>
+                    <p>{formData.site_address || 'No address on file'}</p>
+                  </div>
+                  {formData.ship_to_address && (
+                    <div className="ship-to-address">
+                      <strong>Ship-To Address (Updated):</strong>
+                      <p>
+                        {formData.ship_to_address}
+                        {formData.ship_to_city && `, ${formData.ship_to_city}`}
+                        {formData.ship_to_state && `, ${formData.ship_to_state}`}
+                        {formData.ship_to_postal_code && ` ${formData.ship_to_postal_code}`}
+                        {formData.ship_to_country && `, ${formData.ship_to_country}`}
+                      </p>
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    className="btn-edit-address"
+                    onClick={() => setShowAddressModal(true)}
+                  >
+                    {formData.ship_to_address ? 'Edit Ship-To Address' : 'Set Different Ship-To Address'}
+                  </button>
+                </div>
+              </div>
+
               <div className="form-group">
                 <label className="checkbox-label">
                   <input
@@ -655,6 +706,14 @@ const IntakeForm: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Address Edit Modal */}
+      <AddressEditModal
+        isVisible={showAddressModal}
+        currentAddress={formData.site_address || ''}
+        onClose={() => setShowAddressModal(false)}
+        onSave={handleAddressSave}
+      />
     </div>
   );
 };

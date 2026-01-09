@@ -378,3 +378,68 @@ textarea.form-control {
     flex-direction: column;
   }
 }
+
+/* Address Display Section */
+.address-display-section {
+  background: #f8f9fa;
+  border: 2px solid var(--stryker-gray);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+.current-address,
+.ship-to-address {
+  margin-bottom: 1rem;
+}
+
+.current-address strong,
+.ship-to-address strong {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--stryker-dark-gray);
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.current-address p,
+.ship-to-address p {
+  margin: 0;
+  padding: 0.75rem;
+  background: white;
+  border-radius: 8px;
+  color: var(--stryker-black);
+  line-height: 1.5;
+}
+
+.ship-to-address {
+  background: #fff4d6;
+  padding: 1rem;
+  border-radius: 8px;
+  border-left: 4px solid var(--stryker-gold);
+}
+
+.ship-to-address p {
+  background: white;
+}
+
+.btn-edit-address {
+  width: 100%;
+  padding: 0.875rem;
+  background: var(--stryker-gold);
+  color: var(--stryker-black);
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 1rem;
+}
+
+.btn-edit-address:hover {
+  background: var(--stryker-orange);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 181, 0, 0.3);
+}

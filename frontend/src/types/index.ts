@@ -93,6 +93,11 @@ export interface ServiceRequestCreate {
   customer_number?: string;
   customer_name?: string;
   site_address?: string;
+  ship_to_address?: string;
+  ship_to_city?: string;
+  ship_to_state?: string;
+  ship_to_postal_code?: string;
+  ship_to_country?: string;
   serial_number?: string;
   item_number?: string;
   lot_number?: string;
