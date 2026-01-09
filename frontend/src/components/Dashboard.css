@@ -265,7 +265,7 @@
 
 .status-repair-completed {
   background: #fff4d6;
-  color: #FFB500; /* Stryker Gold */
+  color: #AF6D04; /* Stryker Orange - Better contrast */
 }
 
 .status-shipped-back {
