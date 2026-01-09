@@ -55,6 +55,7 @@ const TicketDetail: React.FC<TicketDetailProps> = ({ ticketId, onClose }) => {
     status: request.status === 'Submitted' ? 'Open' : request.status,
     priority: request.urgency_level === 'Urgent' ? 'High' : request.urgency_level,
     category: request.main_reason,
+    subcategory: request.sub_reason,
     date: request.submitted_date ? new Date(request.submitted_date).toISOString().split('T')[0] : 'N/A',
     assignee: request.territory_code || 'Unassigned',
     contactName: request.contact_name,
@@ -88,6 +89,12 @@ const TicketDetail: React.FC<TicketDetailProps> = ({ ticketId, onClose }) => {
                 <span className="meta-icon">📞</span>
                 {ticket.contactPhone}
               </span>
+              <span className="meta-item">
+                <div className="assignee-chip-header">
+                  <div className="assignee-avatar-small">{ticket.assignee.charAt(0)}</div>
+                  {ticket.assignee}
+                </div>
+              </span>
             </div>
           </div>
           <button onClick={onClose} className="btn-close-detail">✕</button>
@@ -117,26 +124,29 @@ const TicketDetail: React.FC<TicketDetailProps> = ({ ticketId, onClose }) => {
         <div className="detail-content">
           {activeTab === 'details' && (
             <div className="tab-panel">
-              <div className="info-grid">
-                <div className="info-item">
+              {/* Category - Full Width */}
+              <div className="category-section">
+                <div className="info-label">Category</div>
+                <div className="info-value-large">{ticket.category}</div>
+                {ticket.subcategory && (
+                  <div className="subcategory-text">{ticket.subcategory}</div>
+                )}
+              </div>
+
+              {/* Status & Priority - 50/50 */}
+              <div className="status-priority-row">
+                <div className="info-item-half">
                   <div className="info-label">Status</div>
                   <span className="status-badge status-open">{ticket.status}</span>
                 </div>
-                <div className="info-item">
+                <div className="info-item-half">
                   <div className="info-label">Priority</div>
                   <span className="priority-badge priority-critical">{ticket.priority}</span>
                 </div>
-                <div className="info-item">
-                  <div className="info-label">Category</div>
-                  <div className="info-value">{ticket.category}</div>
-                </div>
-                <div className="info-item">
-                  <div className="info-label">Assignee</div>
-                  <div className="assignee-chip">
-                    <div className="assignee-avatar-small">{ticket.assignee.charAt(0)}</div>
-                    {ticket.assignee}
-                  </div>
-                </div>
+              </div>
+
+              {/* Loaner & Quote Requirements */}
+              <div className="info-grid">
                 <div className="info-item">
                   <div className="info-label">Loaner Required</div>
                   <div className="info-value">
