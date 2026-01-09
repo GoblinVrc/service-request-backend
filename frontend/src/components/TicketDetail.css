@@ -159,6 +159,16 @@
   border-bottom: 1px solid #e9ecef;
 }
 
+/* Requirements Row - Centered */
+.status-priority-row.requirements-row {
+  grid-template-columns: auto auto;
+  justify-content: center;
+  gap: 2rem;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .info-item-half {
   display: flex;
   flex-direction: column;

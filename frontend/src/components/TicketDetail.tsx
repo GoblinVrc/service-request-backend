@@ -221,8 +221,8 @@ const TicketDetail: React.FC<TicketDetailProps> = ({ ticketId, onClose }) => {
                 </div>
               </div>
 
-              {/* Loaner & Quote Requirements - 50/50 */}
-              <div className="status-priority-row">
+              {/* Loaner & Quote Requirements - Centered */}
+              <div className="status-priority-row requirements-row">
                 <div className="info-item-half">
                   <div className="info-label">Quote Required</div>
                   <div className="info-value">
