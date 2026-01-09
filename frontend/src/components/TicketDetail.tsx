@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import apiService from '../services/apiService';
 import { ServiceRequest } from '../types';
 import LoadingModal from './LoadingModal';
+import StatusUpdateModal from './StatusUpdateModal';
 import './TicketDetail.css';
 
 interface TicketDetailProps {
@@ -13,6 +14,7 @@ const TicketDetail: React.FC<TicketDetailProps> = ({ ticketId, onClose }) => {
   const [activeTab, setActiveTab] = useState<'details' | 'history' | 'comments'>('details');
   const [request, setRequest] = useState<ServiceRequest | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showStatusModal, setShowStatusModal] = useState(false);
 
   const loadRequestDetails = React.useCallback(async () => {
     setIsLoading(true);
@@ -30,6 +32,30 @@ const TicketDetail: React.FC<TicketDetailProps> = ({ ticketId, onClose }) => {
   useEffect(() => {
     loadRequestDetails();
   }, [loadRequestDetails]);
+
+  const handleUpdateStatus = (newStatus: string) => {
+    // TODO: API call to update status
+    console.log('Updating status to:', newStatus);
+    // For now, just reload the request
+    loadRequestDetails();
+  };
+
+  // Check user role from localStorage
+  const getUserRole = (): string => {
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        return user.role || 'Customer';
+      } catch {
+        return 'Customer';
+      }
+    }
+    return 'Customer';
+  };
+
+  const userRole = getUserRole();
+  const canUpdateStatus = userRole === 'SalesTech' || userRole === 'Admin';
 
   if (isLoading) {
     return <LoadingModal isVisible={true} message="Loading request details..." />;
@@ -145,9 +171,9 @@ const TicketDetail: React.FC<TicketDetailProps> = ({ ticketId, onClose }) => {
                 </div>
               </div>
 
-              {/* Loaner & Quote Requirements */}
-              <div className="info-grid">
-                <div className="info-item">
+              {/* Loaner & Quote Requirements - 50/50 */}
+              <div className="status-priority-row">
+                <div className="info-item-half">
                   <div className="info-label">Loaner Required</div>
                   <div className="info-value">
                     {ticket.loanerRequired ? (
@@ -157,7 +183,7 @@ const TicketDetail: React.FC<TicketDetailProps> = ({ ticketId, onClose }) => {
                     )}
                   </div>
                 </div>
-                <div className="info-item">
+                <div className="info-item-half">
                   <div className="info-label">Quote Required</div>
                   <div className="info-value">
                     {ticket.quoteRequired ? (
@@ -175,8 +201,17 @@ const TicketDetail: React.FC<TicketDetailProps> = ({ ticketId, onClose }) => {
               </div>
 
               <div className="action-buttons">
-                <button className="btn-action btn-primary">Update Status</button>
-                <button className="btn-action btn-secondary">Assign</button>
+                {canUpdateStatus && (
+                  <>
+                    <button
+                      className="btn-action btn-primary"
+                      onClick={() => setShowStatusModal(true)}
+                    >
+                      Update Status
+                    </button>
+                    <button className="btn-action btn-secondary">Assign</button>
+                  </>
+                )}
                 <button className="btn-action btn-secondary">Add Comment</button>
               </div>
             </div>
@@ -234,6 +269,14 @@ const TicketDetail: React.FC<TicketDetailProps> = ({ ticketId, onClose }) => {
         </div>
         <button className="btn-upload-attachment">+ Add Attachment</button>
       </div>
+
+      {/* Status Update Modal */}
+      <StatusUpdateModal
+        isVisible={showStatusModal}
+        currentStatus={ticket.status}
+        onClose={() => setShowStatusModal(false)}
+        onUpdateStatus={handleUpdateStatus}
+      />
     </div>
   );
 };

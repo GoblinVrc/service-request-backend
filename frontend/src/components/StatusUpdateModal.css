@@ -1,0 +1,232 @@
+/* Status Update Modal */
+
+.status-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  animation: fadeIn 0.2s ease;
+}
+
+.status-modal-content {
+  background: var(--stryker-white);
+  border-radius: 16px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.status-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2rem;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.status-modal-header h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--stryker-black);
+  margin: 0;
+}
+
+.status-modal-close {
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border: 2px solid var(--stryker-gray);
+  border-radius: 50%;
+  color: var(--stryker-dark-gray);
+  font-size: 1.25rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.status-modal-close:hover {
+  background: #ffebee;
+  border-color: #c62828;
+  color: #c62828;
+}
+
+.status-modal-body {
+  padding: 2rem;
+}
+
+.status-modal-description {
+  font-size: 1rem;
+  color: var(--stryker-dark-gray);
+  margin: 0 0 1.5rem 0;
+}
+
+.status-options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.status-option {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: #f8f9fa;
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.status-option:hover {
+  background: #fffbf2;
+  border-color: var(--stryker-gold);
+}
+
+.status-option.selected {
+  background: linear-gradient(135deg, rgba(255, 181, 0, 0.1) 0%, rgba(255, 163, 0, 0.1) 100%);
+  border-color: var(--stryker-gold);
+  box-shadow: 0 2px 8px rgba(255, 181, 0, 0.2);
+}
+
+.status-option-radio {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--stryker-gray);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.status-option.selected .status-option-radio {
+  border-color: var(--stryker-gold);
+  background: var(--stryker-white);
+}
+
+.status-option-radio-dot {
+  width: 10px;
+  height: 10px;
+  background: var(--stryker-gold);
+  border-radius: 50%;
+  animation: scaleIn 0.2s ease;
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+.status-option-label {
+  flex: 1;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--stryker-black);
+}
+
+.status-option-checkmark {
+  font-size: 1.25rem;
+  color: var(--stryker-gold);
+  font-weight: bold;
+  animation: scaleIn 0.2s ease;
+}
+
+.status-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding: 1.5rem 2rem;
+  border-top: 2px solid #e9ecef;
+}
+
+.status-modal-btn-cancel {
+  padding: 0.75rem 1.5rem;
+  background: transparent;
+  border: 2px solid var(--stryker-gray);
+  border-radius: 8px;
+  color: var(--stryker-dark-gray);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.status-modal-btn-cancel:hover {
+  background: #f8f9fa;
+  border-color: var(--stryker-gold);
+  color: var(--stryker-gold);
+}
+
+.status-modal-btn-update {
+  padding: 0.75rem 1.5rem;
+  background: var(--stryker-gold);
+  border: none;
+  border-radius: 8px;
+  color: var(--stryker-black);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.status-modal-btn-update:hover {
+  background: var(--stryker-orange);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 181, 0, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .status-modal-content {
+    width: 95%;
+    margin: 1rem;
+  }
+
+  .status-modal-header {
+    padding: 1.25rem 1.5rem;
+  }
+
+  .status-modal-header h2 {
+    font-size: 1.25rem;
+  }
+
+  .status-modal-body {
+    padding: 1.5rem;
+  }
+
+  .status-modal-footer {
+    padding: 1.25rem 1.5rem;
+    flex-direction: column;
+  }
+
+  .status-modal-btn-cancel,
+  .status-modal-btn-update {
+    width: 100%;
+  }
+}
