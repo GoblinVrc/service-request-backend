@@ -432,10 +432,11 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
 
             {formData.customer_number && (
               <div className="selected-item">
-                <h4>Selected Customer</h4>
+                <h4>✓ Selected Customer</h4>
                 <div className="item-details">
-                  <p><strong>Customer Number:</strong> {formData.customer_number}</p>
-                  <p><strong>Customer Name:</strong> {formData.customer_name}</p>
+                  <p><strong>Number:</strong> {formData.customer_number}</p>
+                  <p><strong>Name:</strong> {formData.customer_name}</p>
+                  {/* Address fields will be added when available from backend */}
                 </div>
               </div>
             )}
@@ -480,10 +481,12 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
 
           {formData.item_number && (
             <div className="selected-item">
-              <h4>Selected Item</h4>
+              <h4>✓ Selected Item</h4>
               <div className="item-details">
-                <p><strong>Item Number:</strong> {formData.item_number}</p>
+                <p><strong>Item Code:</strong> {formData.item_number}</p>
                 <p><strong>Description:</strong> {formData.item_description}</p>
+                {formData.serial_number && <p><strong>Serial Number:</strong> {formData.serial_number}</p>}
+                {/* Lot number will be added when available from backend */}
                 {formData.product_family && <p><strong>Product Family:</strong> {formData.product_family}</p>}
               </div>
             </div>
