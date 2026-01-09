@@ -101,15 +101,15 @@ def create_request(
     if not customer_number:
         raise HTTPException(400, "Customer number not found")
 
-    # Get territory
+    # Get territory from customers table
     territory_query = """
-        SELECT territory
-        FROM regops_app.tbl_globi_eu_am_99_customer_territories
+        SELECT territory_code
+        FROM regops_app.tbl_globi_eu_am_99_customers
         WHERE customer_number = %s
         LIMIT 1
     """
     territory_result = execute_query(territory_query, (customer_number,))
-    territory = territory_result[0]['territory'] if territory_result else 'UNKNOWN'
+    territory = territory_result[0]['territory_code'] if territory_result else 'UNKNOWN'
 
     # Validation
     if not any([request.serial_number, request.lot_number, request.item_number]):

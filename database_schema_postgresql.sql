@@ -87,30 +87,25 @@ CREATE INDEX idx_items_is_serviceable ON regops_app.tbl_globi_eu_am_99_items(is_
 -- ============================================================================
 
 -- Customers - Extended
+-- ACTUAL SCHEMA: Contains territory_code directly in customers table
 CREATE TABLE regops_app.tbl_globi_eu_am_99_customers (
     customer_number VARCHAR(50) PRIMARY KEY,
-    customer_name VARCHAR(200) NOT NULL,
+    customer_name VARCHAR(255) NOT NULL,
+    territory_code VARCHAR(10) NOT NULL,
+    address_line1 VARCHAR(255),
+    address_line2 VARCHAR(255),
+    city VARCHAR(100),
+    postal_code VARCHAR(20),
     country_code VARCHAR(10),
+    is_active BOOLEAN DEFAULT true,
+    created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     bill_to_address VARCHAR(500),
     ship_to_address VARCHAR(500),
-    phone_number VARCHAR(50),
-    email VARCHAR(200),
-    is_active BOOLEAN DEFAULT true,
-    has_pro_care_contract BOOLEAN DEFAULT false,
-    created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    modified_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (country_code) REFERENCES regops_app.tbl_globi_eu_am_99_countries(country_code)
 );
 
--- Customer Territories
-CREATE TABLE regops_app.tbl_globi_eu_am_99_customer_territories (
-    id SERIAL PRIMARY KEY,
-    customer_number VARCHAR(50) NOT NULL,
-    territory VARCHAR(100) NOT NULL,
-    FOREIGN KEY (customer_number) REFERENCES regops_app.tbl_globi_eu_am_99_customers(customer_number)
-);
-
-CREATE INDEX idx_customer_territory ON regops_app.tbl_globi_eu_am_99_customer_territories(customer_number, territory);
+-- NOTE: tbl_globi_eu_am_99_customer_territories table DOES NOT EXIST in actual database
+-- Territory information is stored directly in customers table via territory_code column
 
 -- Customer Users (who can submit requests)
 CREATE TABLE regops_app.tbl_globi_eu_am_99_customer_users (
@@ -244,16 +239,16 @@ CREATE INDEX idx_attachments_request ON regops_app.tbl_globi_eu_am_99_attachment
 -- USER MANAGEMENT & ACCESS CONTROL
 -- ============================================================================
 
--- Territory Assignments (Sales Technicians)
-CREATE TABLE regops_app.tbl_globi_eu_am_99_territory_mappings (
+-- User Territory Assignments (Sales Technicians)
+-- ACTUAL TABLE NAME: user_territories (not territory_mappings)
+CREATE TABLE regops_app.tbl_globi_eu_am_99_user_territories (
     id SERIAL PRIMARY KEY,
-    email VARCHAR(200) NOT NULL,
-    territory VARCHAR(100) NOT NULL,
-    is_active BOOLEAN DEFAULT true,
+    user_email VARCHAR NOT NULL,
+    territory_code VARCHAR NOT NULL,
     created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_territory_email ON regops_app.tbl_globi_eu_am_99_territory_mappings(email, territory);
+CREATE INDEX idx_user_territory_email ON regops_app.tbl_globi_eu_am_99_user_territories(user_email, territory_code);
 
 -- Admin Users
 CREATE TABLE regops_app.tbl_globi_eu_am_99_admin_users (
