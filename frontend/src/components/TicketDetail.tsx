@@ -57,6 +57,43 @@ const TicketDetail: React.FC<TicketDetailProps> = ({ ticketId, onClose }) => {
   const userRole = getUserRole();
   const canUpdateStatus = userRole === 'SalesTech' || userRole === 'Admin';
 
+  // Helper functions for dynamic CSS classes
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'Open':
+        return 'status-open';
+      case 'Received':
+        return 'status-received';
+      case 'In Progress':
+        return 'status-in-progress';
+      case 'Repair Completed':
+        return 'status-repair-completed';
+      case 'Shipped Back':
+        return 'status-shipped-back';
+      case 'Resolved':
+        return 'status-resolved';
+      case 'Closed':
+        return 'status-closed';
+      default:
+        return 'status-open';
+    }
+  };
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'Critical':
+        return 'priority-critical';
+      case 'High':
+        return 'priority-high';
+      case 'Normal':
+        return 'priority-normal';
+      case 'Low':
+        return 'priority-low';
+      default:
+        return 'priority-normal';
+    }
+  };
+
   if (isLoading) {
     return <LoadingModal isVisible={true} message="Loading request details..." />;
   }
@@ -163,17 +200,21 @@ const TicketDetail: React.FC<TicketDetailProps> = ({ ticketId, onClose }) => {
               <div className="status-priority-row">
                 <div className="info-item-half">
                   <div className="info-label">Status</div>
-                  <span className="status-badge status-open">{ticket.status}</span>
+                  <span className={`status-badge ${getStatusColor(ticket.status)}`}>
+                    {ticket.status}
+                  </span>
                 </div>
                 <div className="info-item-half">
                   <div className="info-label">Priority</div>
-                  <span className="priority-badge priority-critical">{ticket.priority}</span>
+                  <span className={`priority-badge ${getPriorityColor(ticket.priority)}`}>
+                    {ticket.priority}
+                  </span>
                 </div>
               </div>
 
               {/* Loaner & Quote Requirements - 50/50 */}
               <div className="status-priority-row">
-                <div className="info-item-half">
+                <div className="info-item-half align-right">
                   <div className="info-label">Loaner Required</div>
                   <div className="info-value">
                     {ticket.loanerRequired ? (
@@ -183,7 +224,7 @@ const TicketDetail: React.FC<TicketDetailProps> = ({ ticketId, onClose }) => {
                     )}
                   </div>
                 </div>
-                <div className="info-item-half">
+                <div className="info-item-half align-right">
                   <div className="info-label">Quote Required</div>
                   <div className="info-value">
                     {ticket.quoteRequired ? (
