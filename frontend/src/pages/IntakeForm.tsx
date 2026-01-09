@@ -9,6 +9,7 @@ import {
   SubmitResponse,
 } from '../types';
 import AddressEditModal from '../components/AddressEditModal';
+import SuccessModal from '../components/SuccessModal';
 import './IntakeForm.css';
 
 interface IntakeFormProps {
@@ -65,6 +66,10 @@ const IntakeForm: React.FC<IntakeFormProps> = ({ onSubmit: onSubmitCallback, onC
 
   // Address editing modal state
   const [showAddressModal, setShowAddressModal] = useState(false);
+
+  // Success modal state
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successData, setSuccessData] = useState({ requestCode: '', nextSteps: '' });
 
   // Customer search state (for sales/tech/admin)
   const [customerSearchTerm, setCustomerSearchTerm] = useState('');
@@ -352,21 +357,26 @@ const IntakeForm: React.FC<IntakeFormProps> = ({ onSubmit: onSubmitCallback, onC
         formData
       );
 
-      // Success - show confirmation (UR-045)
-      alert(
-        `✓ ${response.message}\n\nRequest Code: ${response.request_code}\n\n${response.next_steps}`
-      );
-
-      // Call the callback to navigate back to dashboard
-      if (onSubmitCallback) {
-        onSubmitCallback();
-      }
+      // Success - show modal
+      setSuccessData({
+        requestCode: response.request_code,
+        nextSteps: response.next_steps || 'Your request has been received and will be processed shortly.'
+      });
+      setShowSuccessModal(true);
     } catch (error: any) {
       setValidationMessage(
         `❌ ${error.response?.data?.detail || 'Submission failed'}`
       );
-    } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleSuccessModalClose = () => {
+    setShowSuccessModal(false);
+    setSubmitting(false);
+    // Call the callback to navigate back to dashboard
+    if (onSubmitCallback) {
+      onSubmitCallback();
     }
   };
 
@@ -462,29 +472,7 @@ const IntakeForm: React.FC<IntakeFormProps> = ({ onSubmit: onSubmitCallback, onC
                 {/* Item/Serial/Lot search */}
                 <div className="search-column">
                   <div className="form-group">
-                    <label>Search By *</label>
-                    <select
-                      className="form-control"
-                      value={itemSearchType}
-                      onChange={(e) => {
-                        setItemSearchType(e.target.value as 'serial' | 'item' | 'lot');
-                        setItemSearchTerm('');
-                        setFilteredItems([]);
-                        setShowItemDropdown(false);
-                      }}
-                    >
-                      <option value="serial">Serial Number</option>
-                      <option value="item">Item Number</option>
-                      <option value="lot">Lot Number</option>
-                    </select>
-                  </div>
-
-                  <div className="form-group">
-                    <label>
-                      {itemSearchType === 'serial' && 'Serial Number *'}
-                      {itemSearchType === 'item' && 'Item Number *'}
-                      {itemSearchType === 'lot' && 'Lot Number *'}
-                    </label>
+                    <label>Search Item / Serial / Lot *</label>
                     <div className="autocomplete-wrapper">
                       <input
                         type="text"
@@ -492,7 +480,7 @@ const IntakeForm: React.FC<IntakeFormProps> = ({ onSubmit: onSubmitCallback, onC
                         value={itemSearchTerm}
                         onChange={(e) => handleItemSearch(e.target.value)}
                         onFocus={() => filteredItems.length > 0 && setShowItemDropdown(true)}
-                        placeholder={`Type to search by ${itemSearchType}...`}
+                        placeholder="Type item number, serial number, or lot number..."
                       />
 
                       {showItemDropdown && filteredItems.length > 0 && (
@@ -530,15 +518,6 @@ const IntakeForm: React.FC<IntakeFormProps> = ({ onSubmit: onSubmitCallback, onC
                   </div>
                 </div>
               </div>
-
-              {autoFilledData && (
-                <div className="autofill-info">
-                  <h4>✓ Auto-filled Information</h4>
-                  <p>Description: {autoFilledData.ItemDescription}</p>
-                  <p>Product Family: {autoFilledData.ProductFamily}</p>
-                  <p>Repairability: {autoFilledData.RepairabilityStatus}</p>
-                </div>
-              )}
             </div>
           )}
 
@@ -1093,6 +1072,14 @@ const IntakeForm: React.FC<IntakeFormProps> = ({ onSubmit: onSubmitCallback, onC
         currentAddress={formData.site_address || ''}
         onClose={() => setShowAddressModal(false)}
         onSave={handleAddressSave}
+      />
+
+      {/* Success Modal */}
+      <SuccessModal
+        isVisible={showSuccessModal}
+        requestCode={successData.requestCode}
+        nextSteps={successData.nextSteps}
+        onClose={handleSuccessModalClose}
       />
     </div>
   );
