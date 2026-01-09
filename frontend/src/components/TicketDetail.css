@@ -555,39 +555,40 @@
   white-space: nowrap;
 }
 
+/* Status colors using Stryker Brand Palette 2025 */
 .status-open {
   background: #e3f2fd;
-  color: #1565c0;
+  color: #1C5687; /* Stryker Blue */
 }
 
 .status-received {
-  background: #f3e5f5;
-  color: #7b1fa2;
+  background: #e0f5f4;
+  color: #4C7D7A; /* Stryker Teal */
 }
 
 .status-in-progress {
-  background: #fff3e0;
-  color: #e65100;
+  background: #ffe5cc;
+  color: #AF6D04; /* Stryker Orange */
 }
 
 .status-repair-completed {
-  background: #e0f2f1;
-  color: #00695c;
+  background: #fff4d6;
+  color: #FFB500; /* Stryker Gold */
 }
 
 .status-shipped-back {
-  background: #ede7f6;
-  color: #512da8;
+  background: #f3e5f5;
+  color: #85458A; /* Stryker Purple */
 }
 
 .status-resolved {
   background: #e8f5e9;
-  color: #2e7d32;
+  color: #2e7d32; /* Success Green */
 }
 
 .status-closed {
   background: #f5f5f5;
-  color: #616161;
+  color: #545857; /* Stryker Dark Gray */
 }
 
 /* Priority Badges */
