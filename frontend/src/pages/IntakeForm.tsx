@@ -30,6 +30,10 @@ interface Customer {
   customer_name: string;
   territory_code: string;
   country_code: string;
+  bill_to_street?: string;
+  bill_to_zip?: string;
+  bill_to_city?: string;
+  bill_to_country?: string;
 }
 
 // Multi-step form for service request intake (UR-048)
@@ -174,6 +178,10 @@ const IntakeForm: React.FC<IntakeFormProps> = ({ onSubmit: onSubmitCallback, onC
       customer_name: customer.customer_name,
       territory_code: customer.territory_code,
       country_code: customer.country_code,
+      bill_to_street: customer.bill_to_street,
+      bill_to_zip: customer.bill_to_zip,
+      bill_to_city: customer.bill_to_city,
+      bill_to_country: customer.bill_to_country,
     });
     setCustomerSearchTerm(customer.customer_name);
     setShowCustomerDropdown(false);
@@ -496,8 +504,11 @@ const IntakeForm: React.FC<IntakeFormProps> = ({ onSubmit: onSubmitCallback, onC
                             <p>
                               <strong>{formData.customer_number}</strong> - {formData.customer_name}
                             </p>
-                            <p>Territory: {formData.territory_code}</p>
-                            <p>Country: {formData.country_code}</p>
+                            {formData.bill_to_street && <p>{formData.bill_to_street}</p>}
+                            {(formData.bill_to_zip || formData.bill_to_city) && (
+                              <p>{formData.bill_to_zip} {formData.bill_to_city}</p>
+                            )}
+                            {formData.bill_to_country && <p>{formData.bill_to_country}</p>}
                           </div>
                         </div>
                       )}

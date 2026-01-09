@@ -97,6 +97,12 @@ export interface ServiceRequestCreate {
   territory_code?: string;
   site_address?: string;
 
+  // Bill-To Address (from customer record - 4 fields)
+  bill_to_street?: string;
+  bill_to_zip?: string;
+  bill_to_city?: string;
+  bill_to_country?: string;
+
   // Ship-To Address (4 fields)
   ship_to_street?: string;
   ship_to_zip?: string;
