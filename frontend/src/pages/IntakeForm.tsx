@@ -351,11 +351,29 @@ const IntakeForm: React.FC<IntakeFormProps> = ({ onSubmit: onSubmitCallback, onC
     }
 
     setSubmitting(true);
+
+    // Determine correct request_type based on what's filled
+    // Priority: Item > Serial > General (Lot falls under Item)
+    let requestType: 'Serial' | 'Item' | 'General' = 'General';
+    if (formData.item_number && formData.item_number.trim()) {
+      requestType = 'Item';
+    } else if (formData.serial_number && formData.serial_number.trim()) {
+      requestType = 'Serial';
+    } else if (formData.lot_number && formData.lot_number.trim()) {
+      requestType = 'Item'; // Lot number is treated as Item type
+    }
+
+    // Prepare submission data with correct request_type
+    const submissionData = {
+      ...formData,
+      request_type: requestType,
+    };
+
     try {
-      console.log('Submitting form data:', formData);
+      console.log('Submitting form data:', submissionData);
       const response = await apiService.post<SubmitResponse>(
         API_ENDPOINTS.SUBMIT_REQUEST,
-        formData
+        submissionData
       );
 
       // Success - show modal
@@ -475,12 +493,11 @@ const IntakeForm: React.FC<IntakeFormProps> = ({ onSubmit: onSubmitCallback, onC
                         <div className="selected-item">
                           <h4>✓ Selected Customer</h4>
                           <div className="item-details">
-                            <p><strong>{formData.customer_number}</strong> - {formData.customer_name}</p>
-                            {formData.site_address && <p>{formData.site_address}</p>}
-                            {(formData.ship_to_zip || formData.ship_to_city) && (
-                              <p>{formData.ship_to_zip} {formData.ship_to_city}</p>
-                            )}
-                            {formData.country_code && <p>{formData.country_code}</p>}
+                            <p>
+                              <strong>{formData.customer_number}</strong> - {formData.customer_name}
+                            </p>
+                            <p>Territory: {formData.territory_code}</p>
+                            <p>Country: {formData.country_code}</p>
                           </div>
                         </div>
                       )}
