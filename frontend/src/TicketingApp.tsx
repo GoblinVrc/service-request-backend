@@ -4,9 +4,11 @@ import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
 import SubmitRequest from './components/SubmitRequest';
 import TicketDetail from './components/TicketDetail';
+import RequestTypeModal from './components/RequestTypeModal';
+import ComingSoon from './pages/ComingSoon';
 import './TicketingApp.css';
 
-type ViewType = 'dashboard' | 'my-requests' | 'analytics' | 'submit' | 'detail';
+type ViewType = 'dashboard' | 'my-requests' | 'analytics' | 'submit' | 'detail' | 'coming-soon';
 
 const TicketingApp: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
@@ -16,6 +18,8 @@ const TicketingApp: React.FC = () => {
   });
   const [currentView, setCurrentView] = useState<ViewType>('dashboard');
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
+  const [showRequestTypeModal, setShowRequestTypeModal] = useState(false);
+  const [comingSoonType, setComingSoonType] = useState<'maintenance' | 'installation' | null>(null);
   const [filters, setFilters] = useState({
     status: 'All',
     dateFrom: '',
@@ -33,7 +37,17 @@ const TicketingApp: React.FC = () => {
   };
 
   const handleNewRequest = () => {
-    setCurrentView('submit');
+    setShowRequestTypeModal(true);
+  };
+
+  const handleRequestTypeSelect = (type: 'repair' | 'maintenance' | 'installation') => {
+    setShowRequestTypeModal(false);
+    if (type === 'repair') {
+      setCurrentView('submit');
+    } else {
+      setComingSoonType(type);
+      setCurrentView('coming-soon');
+    }
   };
 
   const handleTicketClick = (ticketId: string) => {
@@ -94,7 +108,16 @@ const TicketingApp: React.FC = () => {
         {currentView === 'detail' && selectedTicketId && (
           <TicketDetail ticketId={selectedTicketId} onClose={handleCloseDetail} />
         )}
+
+        {currentView === 'coming-soon' && comingSoonType && (
+          <ComingSoon />
+        )}
       </main>
+
+      <RequestTypeModal
+        isVisible={showRequestTypeModal}
+        onSelectType={handleRequestTypeSelect}
+      />
     </div>
   );
 };
