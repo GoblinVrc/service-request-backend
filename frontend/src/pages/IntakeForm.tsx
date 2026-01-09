@@ -10,6 +10,7 @@ import {
 } from '../types';
 import AddressEditModal from '../components/AddressEditModal';
 import SuccessModal from '../components/SuccessModal';
+import LoadingModal from '../components/LoadingModal';
 import './IntakeForm.css';
 
 interface IntakeFormProps {
@@ -384,7 +385,8 @@ const IntakeForm: React.FC<IntakeFormProps> = ({ onSubmit: onSubmitCallback, onC
         submissionData
       );
 
-      // Success - show modal
+      // Success - hide loading, show success modal
+      setSubmitting(false);
       setSuccessData({
         requestCode: response.request_code,
         nextSteps: response.next_steps || 'Your request has been received and will be processed shortly.'
@@ -1144,6 +1146,12 @@ const IntakeForm: React.FC<IntakeFormProps> = ({ onSubmit: onSubmitCallback, onC
         currentAddress={formData.site_address || ''}
         onClose={() => setShowAddressModal(false)}
         onSave={handleAddressSave}
+      />
+
+      {/* Loading Modal */}
+      <LoadingModal
+        isVisible={submitting}
+        message="Submitting request..."
       />
 
       {/* Success Modal */}
