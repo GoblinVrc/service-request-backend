@@ -90,26 +90,58 @@ export interface ServiceRequestCreate {
   contact_name: string;
   contact_phone: string;
   main_reason: string;
+
+  // Customer Information
   customer_number?: string;
   customer_name?: string;
   site_address?: string;
-  ship_to_address?: string;
+
+  // Ship-To Address (4 fields)
+  ship_to_street?: string;
+  ship_to_zip?: string;
   ship_to_city?: string;
-  ship_to_state?: string;
-  ship_to_postal_code?: string;
   ship_to_country?: string;
+
+  // Alternative Billing Address (optional, 4 fields)
+  alternative_billing_street?: string;
+  alternative_billing_zip?: string;
+  alternative_billing_city?: string;
+  alternative_billing_country?: string;
+
+  // Item Information
   serial_number?: string;
   item_number?: string;
   lot_number?: string;
   item_description?: string;
   product_family?: string;
+
+  // Issue Details
   sub_reason?: string;
   issue_description?: string;
-  requested_service_date?: string;
+
+  // Safety & Patient Involvement (MANDATORY)
+  safety_patient_involved: boolean;
+  safety_patient_details?: string;
+
+  // Service Requirements
   urgency_level?: 'Normal' | 'Urgent' | 'Critical';
   loaner_required?: boolean;
   loaner_details?: string;
   quote_required?: boolean;
+
+  // Pickup Information (MANDATORY)
+  pickup_date: string;
+  pickup_time: string;
+
+  // PO & Customer Ident (MANDATORY)
+  po_reference_number: string;
+  customer_ident_code: string;
+
+  // Optional Fields
+  preferred_contact_method?: string;
+  contract_info?: string;
+  loaner_fee_approval?: boolean;
+  requested_service_date?: string;
   language_code?: string;
   customer_notes?: string;
 }
