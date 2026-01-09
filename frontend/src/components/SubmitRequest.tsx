@@ -303,19 +303,29 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
       const customerNumber = formData.customer_number || user?.customer_number || 'GUEST';
       const customerName = formData.customer_name || user?.customer_name || 'Guest Customer';
 
+      // Determine request type based on what's filled
+      let requestType: 'Serial' | 'Item' | 'General' = 'Item';
+      if (formData.serial_number && formData.serial_number.trim()) {
+        requestType = 'Serial';
+      } else if (formData.item_number && formData.item_number.trim()) {
+        requestType = 'Item';
+      } else {
+        requestType = 'General';
+      }
+
       const submitData = {
-        request_type: formData.serial_number ? 'Serial' : 'Item',
+        request_type: requestType,
         country_code: 'US',
         language_code: 'en',
         customer_number: customerNumber,
         customer_name: customerName,
         contact_name: formData.contact_name,
-        contact_email: formData.contact_email,
+        contact_email: user?.email || formData.contact_email || '',
         contact_phone: formData.contact_phone,
         serial_number: formData.serial_number || undefined,
         item_number: formData.item_number || undefined,
-        item_description: formData.item_description,
-        product_family: formData.product_family,
+        item_description: formData.item_description || 'Service Request',
+        product_family: formData.product_family || undefined,
         main_reason: formData.main_reason,
         sub_reason: formData.sub_reason || undefined,
         issue_description: formData.issue_description,
@@ -666,8 +676,9 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
         <h2 className="step-title">Review & Submit</h2>
 
         <div className="summary-section">
+          {/* Row 1: Customer (if applicable) - Full width */}
           {shouldShowCustomerSearch() && formData.customer_number && (
-            <div className="summary-block">
+            <div className="summary-block full-width">
               <h3>Customer Information</h3>
               <div className="summary-content">
                 <p><strong>Customer:</strong> {formData.customer_name} ({formData.customer_number})</p>
@@ -682,12 +693,13 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
             </div>
           )}
 
+          {/* Row 2: Item + Issue Type (side by side) */}
           <div className="summary-block">
             <h3>Item Information</h3>
             <div className="summary-content">
-              <p><strong>Item Number:</strong> {formData.item_number}</p>
-              <p><strong>Description:</strong> {formData.item_description}</p>
+              {formData.item_number && <p><strong>Item Number:</strong> {formData.item_number}</p>}
               {formData.serial_number && <p><strong>Serial Number:</strong> {formData.serial_number}</p>}
+              <p><strong>Description:</strong> {formData.item_description}</p>
               {formData.product_family && <p><strong>Product Family:</strong> {formData.product_family}</p>}
             </div>
             <button
@@ -714,6 +726,7 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
             </button>
           </div>
 
+          {/* Row 3: Contact + Urgency (side by side) */}
           <div className="summary-block">
             <h3>Point of Contact</h3>
             <div className="summary-content">
@@ -729,13 +742,26 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
             </button>
           </div>
 
-          <div className="summary-block full-width">
-            <h3>Details</h3>
+          <div className="summary-block">
+            <h3>Service Options</h3>
             <div className="summary-content">
               <p><strong>Urgency:</strong> {formData.urgency_level}</p>
               <p><strong>Loaner Required:</strong> {formData.loaner_required ? 'Yes' : 'No'}</p>
               <p><strong>Quote Required:</strong> {formData.quote_required ? 'Yes' : 'No'}</p>
-              <p><strong>Additional Comments:</strong></p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setCurrentStep(2)}
+              className="btn-edit-section"
+            >
+              Edit
+            </button>
+          </div>
+
+          {/* Row 4: Additional Comments - Full width */}
+          <div className="summary-block full-width">
+            <h3>Additional Comments</h3>
+            <div className="summary-content">
               <p className="summary-description">{formData.issue_description}</p>
             </div>
             <button
@@ -747,8 +773,9 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
             </button>
           </div>
 
+          {/* Row 5: Attachments - Full width (if any) */}
           {uploadedFiles.length > 0 && (
-            <div className="summary-block">
+            <div className="summary-block full-width">
               <h3>Attachments</h3>
               <div className="summary-content">
                 <p><strong>{uploadedFiles.length} file(s) attached</strong></p>
