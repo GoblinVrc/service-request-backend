@@ -18,6 +18,9 @@ class ServiceRequestCreate(BaseModel):
     contact_email: str
     contact_phone: Optional[str] = None
 
+class StatusUpdate(BaseModel):
+    status: str
+
 @router.get("")
 def get_requests(
     token_data: TokenData = Depends(verify_entra_token),
@@ -190,12 +193,12 @@ def get_request_detail(
 @router.patch("/{request_id}/status")
 def update_request_status(
     request_id: int,
-    new_status: str,
+    status_update: StatusUpdate,
     token_data: TokenData = Depends(require_role([Roles.SALES_TECH, Roles.ADMIN]))
 ):
-    allowed_statuses = ["Submitted", "In Progress", "Resolved", "Closed", "Cancelled"]
+    allowed_statuses = ["Open", "Received", "In Progress", "Repair Completed", "Shipped Back", "Resolved", "Closed"]
 
-    if new_status not in allowed_statuses:
+    if status_update.status not in allowed_statuses:
         raise HTTPException(400, f"Invalid status. Allowed: {allowed_statuses}")
 
     # RBAC for SalesTech
@@ -220,9 +223,9 @@ def update_request_status(
         WHERE id = %s
     """
 
-    rows = execute_query(update_query, (new_status, request_id), fetch=False)
+    rows = execute_query(update_query, (status_update.status, request_id), fetch=False)
 
     if rows == 0:
         raise HTTPException(404, "Request not found")
 
-    return {"message": "Status updated", "new_status": new_status}
+    return {"message": "Status updated", "new_status": status_update.status}

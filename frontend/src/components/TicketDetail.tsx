@@ -33,11 +33,20 @@ const TicketDetail: React.FC<TicketDetailProps> = ({ ticketId, onClose }) => {
     loadRequestDetails();
   }, [loadRequestDetails]);
 
-  const handleUpdateStatus = (newStatus: string) => {
-    // TODO: API call to update status
-    console.log('Updating status to:', newStatus);
-    // For now, just reload the request
-    loadRequestDetails();
+  const handleUpdateStatus = async (newStatus: string) => {
+    if (!request) return;
+
+    try {
+      setIsLoading(true);
+      await apiService.patch(`/api/requests/${request.id}/status`, { status: newStatus });
+      // Reload to show updated status
+      await loadRequestDetails();
+    } catch (error) {
+      console.error('Failed to update status:', error);
+      alert('Failed to update status. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Check user role from localStorage
@@ -214,21 +223,21 @@ const TicketDetail: React.FC<TicketDetailProps> = ({ ticketId, onClose }) => {
 
               {/* Loaner & Quote Requirements - 50/50 */}
               <div className="status-priority-row">
-                <div className="info-item-half align-right">
-                  <div className="info-label">Loaner Required</div>
+                <div className="info-item-half">
+                  <div className="info-label">Quote Required</div>
                   <div className="info-value">
-                    {ticket.loanerRequired ? (
-                      <span className="requirement-badge requirement-yes">📦 Yes</span>
+                    {ticket.quoteRequired ? (
+                      <span className="requirement-badge requirement-yes">💰 Yes</span>
                     ) : (
                       <span className="requirement-badge requirement-no">No</span>
                     )}
                   </div>
                 </div>
                 <div className="info-item-half align-right">
-                  <div className="info-label">Quote Required</div>
+                  <div className="info-label">Loaner Required</div>
                   <div className="info-value">
-                    {ticket.quoteRequired ? (
-                      <span className="requirement-badge requirement-yes">💰 Yes</span>
+                    {ticket.loanerRequired ? (
+                      <span className="requirement-badge requirement-yes">📦 Yes</span>
                     ) : (
                       <span className="requirement-badge requirement-no">No</span>
                     )}
