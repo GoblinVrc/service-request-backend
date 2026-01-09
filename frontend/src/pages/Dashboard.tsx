@@ -64,11 +64,14 @@ const Dashboard: React.FC = () => {
 
   const getStatusBadgeClass = (status: string) => {
     const statusMap: Record<string, string> = {
-      'Submitted': 'status-submitted',
+      'Open': 'status-open',
+      'Received': 'status-received',
       'In Progress': 'status-in-progress',
+      'Repair Completed': 'status-repair-completed',
+      'Shipped Back': 'status-shipped-back',
       'Resolved': 'status-resolved',
       'Closed': 'status-closed',
-      'Cancelled': 'status-cancelled',
+      'Submitted': 'status-open', // Map Submitted to Open styling
     };
     return `status-badge ${statusMap[status] || ''}`;
   };
