@@ -304,13 +304,12 @@ const SubmitRequest: React.FC<SubmitRequestProps> = ({ onSubmit, onCancel }) => 
       const customerName = formData.customer_name || user?.customer_name || 'Guest Customer';
 
       // Determine request type based on what's filled
-      let requestType: 'Serial' | 'Item' | 'General' = 'Item';
-      if (formData.serial_number && formData.serial_number.trim()) {
-        requestType = 'Serial';
-      } else if (formData.item_number && formData.item_number.trim()) {
+      // Priority: Item > Serial > General
+      let requestType: 'Serial' | 'Item' | 'General' = 'General';
+      if (formData.item_number && formData.item_number.trim()) {
         requestType = 'Item';
-      } else {
-        requestType = 'General';
+      } else if (formData.serial_number && formData.serial_number.trim()) {
+        requestType = 'Serial';
       }
 
       const submitData = {
